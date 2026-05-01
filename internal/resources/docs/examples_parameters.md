@@ -85,7 +85,7 @@ spec:
     container:
       image: alpine:latest
       command: [sh, -c]
-      args: |
+      args:
         - |
           for i in $(seq 1 {{inputs.parameters.count}}); do
             echo "{{inputs.parameters.message}}"

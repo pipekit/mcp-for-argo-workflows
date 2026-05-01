@@ -145,10 +145,10 @@ metadata:
   name: api-credentials
 type: Opaque
 data:
-  # base64 encoded values
-  api-key: bXktc2VjcmV0LWtleQ==
-  username: YWRtaW4=
-  password: cGFzc3dvcmQ=
+  # base64-encoded placeholder values for documentation
+  api-key: <BASE64_ENCODED_API_KEY>
+  username: <BASE64_ENCODED_USERNAME>
+  password: <BASE64_ENCODED_PASSWORD>
 ```
 
 ## Volume Types

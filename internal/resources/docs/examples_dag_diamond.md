@@ -64,7 +64,7 @@ spec:
 
 ## Execution Flow
 
-```
+```text
        A (Start)
       / \
      /   \

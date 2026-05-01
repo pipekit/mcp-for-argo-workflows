@@ -86,7 +86,7 @@ spec:
 
 ## Step Execution Order
 
-```
+```text
 generate-message (Step 1)
         ↓
 process-message (Step 2) - uses output from Step 1

@@ -82,13 +82,13 @@ Standard Kubernetes ObjectMeta fields:
 
 ### Alternative: Template Reference
 
-Instead of embedding workflowSpec, you can reference a template:
+Instead of defining templates inline in `workflowSpec`, you can reference an existing template using `workflowSpec.workflowTemplateRef`:
 
-- **workflowTemplateRef** (WorkflowTemplateRef): Reference to WorkflowTemplate or ClusterWorkflowTemplate
+- **workflowSpec.workflowTemplateRef** (WorkflowTemplateRef): Reference to WorkflowTemplate or ClusterWorkflowTemplate
   - **name** (string): Template name
   - **clusterScope** (bool): If true, references ClusterWorkflowTemplate
 
-Note: Must specify either workflowSpec OR workflowTemplateRef, not both.
+Note: Within a single `workflowSpec`, specify either inline templates OR `workflowTemplateRef`, not both. `workflowTemplateRef` is a field of `workflowSpec` — not an alternative to it.
 
 ### Workflow Metadata
 
@@ -264,12 +264,12 @@ spec:
   timezone: "UTC"
   concurrencyPolicy: "Forbid"
 
-  # Reference existing template instead of embedding spec
-  workflowTemplateRef:
-    name: backup-template
-
-  # Override template arguments
   workflowSpec:
+    # Reference existing template instead of defining templates inline
+    workflowTemplateRef:
+      name: backup-template
+
+    # Pass arguments to the referenced template
     arguments:
       parameters:
       - name: backup-type
