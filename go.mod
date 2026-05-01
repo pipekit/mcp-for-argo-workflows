@@ -5,7 +5,7 @@ go 1.25.7
 require (
 	github.com/argoproj/argo-workflows/v4 v4.0.5
 	github.com/goccy/go-graphviz v0.2.10
-	github.com/modelcontextprotocol/go-sdk v1.5.0
+	github.com/modelcontextprotocol/go-sdk v1.6.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/k3s v0.42.0
@@ -67,7 +67,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/jsonschema-go v0.4.2 // indirect
+	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
