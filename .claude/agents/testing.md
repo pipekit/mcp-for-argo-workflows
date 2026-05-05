@@ -45,8 +45,8 @@ import (
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 
-    "github.com/Joibel/mcp-for-argo-workflows/internal/tools"
-    "github.com/Joibel/mcp-for-argo-workflows/internal/argo/mocks"
+    "github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
+    "github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 func TestGetWorkflow(t *testing.T) {
@@ -106,7 +106,7 @@ func TestGetWorkflow(t *testing.T) {
 Use mockery or manual mocks for Argo service clients:
 
 ```go
-// internal/argo/mocks/workflow_service.go
+// pkg/argo/mocks/workflow_service.go
 type WorkflowServiceClient struct {
     mock.Mock
 }

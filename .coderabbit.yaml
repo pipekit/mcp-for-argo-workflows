@@ -41,14 +41,14 @@ reviews:
         - Thread safety and race conditions
         - Adherence to Go idioms and best practices
         - Proper use of interfaces
-    - path: "internal/tools/**"
+    - path: "pkg/tools/**"
       instructions: |
         This directory contains MCP tool implementations. Review for:
         - Correct JSON schema definitions
         - Proper input validation
         - Clear error messages for users
         - Consistent tool naming conventions
-    - path: "internal/argo/**"
+    - path: "pkg/argo/**"
       instructions: |
         This directory contains Argo Workflows client code. Review for:
         - Correct use of Argo client APIs

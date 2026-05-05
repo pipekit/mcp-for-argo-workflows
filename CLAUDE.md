@@ -37,11 +37,15 @@ make all        # Run fmt, vet, lint, test, build
 
 ```
 cmd/mcp-for-argo-workflows/    # main.go entry point
-internal/
-  server/                       # MCP server implementation
+pkg/                           # Reusable packages — importable by other MCP servers
   argo/                         # Argo client wrapper
   tools/                        # MCP tool implementations
-  config/                       # Configuration handling
+  prompts/                      # MCP prompt implementations
+  resources/                    # MCP resource implementations (embedded docs)
+internal/                      # Binary-specific glue (not importable externally)
+  server/                       # MCP server wiring
+  config/                       # CLI flag / env parsing
+  version/                      # Build-time version info
 ```
 
 ## Architecture

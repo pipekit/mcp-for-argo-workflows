@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Joibel/mcp-for-argo-workflows/internal/argo/mocks"
+	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 // TestNewServer tests that NewServer creates a valid server instance.

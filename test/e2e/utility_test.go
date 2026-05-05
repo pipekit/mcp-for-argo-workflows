@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Joibel/mcp-for-argo-workflows/internal/tools"
+	"github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
 )
 
 // TestGetWorkflowNode tests retrieving details of a specific node within a workflow.

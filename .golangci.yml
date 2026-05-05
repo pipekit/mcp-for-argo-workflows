@@ -104,7 +104,7 @@ linters:
           - ireturn    # Mocks must return interfaces to match real implementations
 
       # Argo client wrapper must return Argo SDK interfaces
-      - path: internal/argo/client\.go
+      - path: pkg/argo/client\.go
         linters:
           - ireturn    # Returns Argo SDK interfaces by design
 

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Joibel/mcp-for-argo-workflows/internal/tools"
+	"github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
 )
 
 // TestWorkflow_FullLifecycle tests the full lifecycle: submit → get → logs → wait → delete.

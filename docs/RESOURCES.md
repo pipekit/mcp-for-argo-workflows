@@ -94,7 +94,7 @@ When using Claude Code or other MCP clients, these resources are automatically a
 
 ## Implementation Details
 
-Resources are implemented in `/internal/resources/` with the following structure:
+Resources are implemented in `/pkg/resources/` with the following structure:
 
 - `workflow_schema.go` - Workflow schema resource and handler
 - `workflow_template_schema.go` - WorkflowTemplate schema resource and handler

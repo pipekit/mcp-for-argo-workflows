@@ -43,7 +43,7 @@ You are a specialist for implementing MCP tools in mcp-for-argo-workflows.
 ## Implementation Pattern
 
 ```go
-// internal/tools/workflow_get.go
+// pkg/tools/workflow_get.go
 package tools
 
 import (

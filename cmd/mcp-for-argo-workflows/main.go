@@ -9,10 +9,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Joibel/mcp-for-argo-workflows/internal/argo"
 	"github.com/Joibel/mcp-for-argo-workflows/internal/config"
 	"github.com/Joibel/mcp-for-argo-workflows/internal/server"
 	"github.com/Joibel/mcp-for-argo-workflows/internal/version"
+	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
 )
 
 const serverName = "mcp-for-argo-workflows"

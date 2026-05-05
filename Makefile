@@ -43,7 +43,7 @@ all: fmt vet lint test $(DIST_LINUX_AMD64)
 ## test: Run tests with race detection and coverage
 test:
 	@echo "Running tests..."
-	$(GO) test -race -coverprofile=coverage.out -covermode=atomic ./internal/...
+	$(GO) test -race -coverprofile=coverage.out -covermode=atomic ./internal/... ./pkg/...
 	@echo "Coverage report: coverage.out"
 
 ## test-e2e: Run end-to-end tests (requires Docker)
