@@ -10,7 +10,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // ListClusterWorkflowTemplatesInput defines the input parameters for the list_cluster_workflow_templates tool.

@@ -12,7 +12,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/yaml"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // PhasePending is the default phase for newly created workflows.

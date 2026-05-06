@@ -1,4 +1,4 @@
-module github.com/Joibel/mcp-for-argo-workflows
+module github.com/pipekit/mcp-for-argo-workflows
 
 go 1.25.7
 

@@ -70,4 +70,4 @@ All examples support these configuration options:
 
 - See the main [README](../README.md) for complete documentation
 - Check [Troubleshooting](../README.md#troubleshooting) for common issues
-- Open an issue on [GitHub](https://github.com/Joibel/mcp-for-argo-workflows/issues)
+- Open an issue on [GitHub](https://github.com/pipekit/mcp-for-argo-workflows/issues)

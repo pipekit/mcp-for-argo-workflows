@@ -13,7 +13,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 const (

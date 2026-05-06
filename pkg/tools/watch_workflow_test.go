@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 func TestWatchWorkflowTool(t *testing.T) {

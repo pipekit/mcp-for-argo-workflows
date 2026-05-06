@@ -12,7 +12,7 @@ import (
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient/workflowtemplate"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // MockClient is a mock implementation of the Argo client.

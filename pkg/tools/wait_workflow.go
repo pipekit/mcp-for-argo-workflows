@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // WaitWorkflowInput defines the input parameters for the wait_workflow tool.

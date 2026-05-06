@@ -4,7 +4,7 @@ package prompts
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // PromptRegistrar is a function that registers a prompt with the MCP server.

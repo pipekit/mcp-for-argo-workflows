@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MCP (Model Context Protocol) server for Argo Workflows, allowing AI assistants like Claude to interact with Argo Workflows via standardized tools.
 
-**Repository**: `github.com/Joibel/mcp-for-argo-workflows`
+**Repository**: `github.com/pipekit/mcp-for-argo-workflows`
 
 ## Goals
 
@@ -23,15 +23,17 @@ MCP (Model Context Protocol) server for Argo Workflows, allowing AI assistants l
 ## Build Commands
 
 ```bash
-make build      # Compile binary to bin/mcp-for-argo-workflows
+make all        # Run fmt, vet, lint, test and build the linux/amd64 binary
+make build-all  # Cross-compile binaries for all platforms into dist/
 make test       # Run tests with race detection and coverage
 make lint       # Run golangci-lint
 make lint-fix   # Run golangci-lint with auto-fix
 make fmt        # Run gofmt and goimports
 make vet        # Run go vet
 make clean      # Remove build artifacts
-make all        # Run fmt, vet, lint, test, build
 ```
+
+Binaries land in `dist/` (e.g. `dist/mcp-for-argo-workflows-linux-amd64`). Run `make help` to see all targets.
 
 ## Directory Structure
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // Valid transport modes.

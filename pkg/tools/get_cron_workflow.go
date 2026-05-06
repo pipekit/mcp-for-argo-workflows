@@ -10,7 +10,7 @@ import (
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient/cronworkflow"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
 )
 
 // GetCronWorkflowInput defines the input parameters for the get_cron_workflow tool.

@@ -1,8 +1,8 @@
 # Project variables
 BINARY_NAME := mcp-for-argo-workflows
-MODULE := github.com/Joibel/mcp-for-argo-workflows
+MODULE := github.com/pipekit/mcp-for-argo-workflows
 DIST_DIR := dist
-DOCKER_IMAGE := ghcr.io/joibel/mcp-for-argo-workflows
+DOCKER_IMAGE := ghcr.io/pipekit/mcp-for-argo-workflows
 
 # Build variables
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")

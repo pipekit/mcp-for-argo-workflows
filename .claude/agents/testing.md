@@ -45,8 +45,8 @@ import (
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 
-    "github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
-    "github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
+    "github.com/pipekit/mcp-for-argo-workflows/pkg/tools"
+    "github.com/pipekit/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 func TestGetWorkflow(t *testing.T) {

@@ -99,7 +99,7 @@ linters-settings:
   govet:
     enable-all: true
   goimports:
-    local-prefixes: github.com/Joibel/mcp-for-argo-workflows
+    local-prefixes: github.com/pipekit/mcp-for-argo-workflows
 
 issues:
   exclude-use-default: false
@@ -130,7 +130,7 @@ lint-fix:
 
 fmt:
 	gofmt -s -w .
-	goimports -w -local github.com/Joibel/mcp-for-argo-workflows .
+	goimports -w -local github.com/pipekit/mcp-for-argo-workflows .
 
 vet:
 	go vet ./...

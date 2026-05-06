@@ -17,7 +17,7 @@ You are the project architect for mcp-for-argo-workflows, an MCP server for Argo
 
 ## Project Context
 
-- **Repository**: github.com/Joibel/mcp-for-argo-workflows
+- **Repository**: github.com/pipekit/mcp-for-argo-workflows
 - **Language**: Go
 - **Key Dependencies**:
   - `github.com/modelcontextprotocol/go-sdk`

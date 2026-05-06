@@ -1,8 +1,8 @@
 services:
   mcp-for-argo-workflows:
     # For production, pin to a specific version instead of :latest
-    # image: ghcr.io/joibel/mcp-for-argo-workflows:v1.0.0
-    image: ghcr.io/joibel/mcp-for-argo-workflows:latest
+    # image: ghcr.io/pipekit/mcp-for-argo-workflows:v1.0.0
+    image: ghcr.io/pipekit/mcp-for-argo-workflows:latest
     container_name: mcp-for-argo-workflows
     ports:
       - "8080:8080"
@@ -28,8 +28,8 @@ services:
   # This profile is intended for local development with port-forwarded Argo Server.
   mcp-for-argo-workflows-host:
     # For production, pin to a specific version instead of :latest
-    # image: ghcr.io/joibel/mcp-for-argo-workflows:v1.0.0
-    image: ghcr.io/joibel/mcp-for-argo-workflows:latest
+    # image: ghcr.io/pipekit/mcp-for-argo-workflows:v1.0.0
+    image: ghcr.io/pipekit/mcp-for-argo-workflows:latest
     container_name: mcp-for-argo-workflows-host
     profiles:
       - host-network

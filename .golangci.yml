@@ -115,4 +115,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/Joibel/mcp-for-argo-workflows
+        - github.com/pipekit/mcp-for-argo-workflows

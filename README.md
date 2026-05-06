@@ -38,21 +38,21 @@ The [Model Context Protocol](https://modelcontextprotocol.io/) is an open standa
 
 ### Download Pre-built Binaries
 
-Download the latest release from the [GitHub Releases](https://github.com/Joibel/mcp-for-argo-workflows/releases) page.
+Download the latest release from the [GitHub Releases](https://github.com/pipekit/mcp-for-argo-workflows/releases) page.
 
 ```bash
 # Linux (amd64)
-curl -Lo mcp-for-argo-workflows https://github.com/Joibel/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-linux-amd64
+curl -Lo mcp-for-argo-workflows https://github.com/pipekit/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-linux-amd64
 chmod +x mcp-for-argo-workflows
 sudo mv mcp-for-argo-workflows /usr/local/bin/
 
 # macOS (Apple Silicon)
-curl -Lo mcp-for-argo-workflows https://github.com/Joibel/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-darwin-arm64
+curl -Lo mcp-for-argo-workflows https://github.com/pipekit/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-darwin-arm64
 chmod +x mcp-for-argo-workflows
 sudo mv mcp-for-argo-workflows /usr/local/bin/
 
 # macOS (Intel)
-curl -Lo mcp-for-argo-workflows https://github.com/Joibel/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-darwin-amd64
+curl -Lo mcp-for-argo-workflows https://github.com/pipekit/mcp-for-argo-workflows/releases/latest/download/mcp-for-argo-workflows-darwin-amd64
 chmod +x mcp-for-argo-workflows
 sudo mv mcp-for-argo-workflows /usr/local/bin/
 ```
@@ -61,7 +61,7 @@ sudo mv mcp-for-argo-workflows /usr/local/bin/
 
 ```bash
 # Clone the repository
-git clone https://github.com/Joibel/mcp-for-argo-workflows.git
+git clone https://github.com/pipekit/mcp-for-argo-workflows.git
 cd mcp-for-argo-workflows
 
 # Build the binary
@@ -73,10 +73,10 @@ make build
 ### Docker
 
 ```bash
-docker pull ghcr.io/joibel/mcp-for-argo-workflows:latest
+docker pull ghcr.io/pipekit/mcp-for-argo-workflows:latest
 
 # Run with kubeconfig mounted
-docker run -v ~/.kube:/root/.kube ghcr.io/joibel/mcp-for-argo-workflows:latest
+docker run -v ~/.kube:/root/.kube ghcr.io/pipekit/mcp-for-argo-workflows:latest
 ```
 
 ## Quick Start
@@ -427,7 +427,7 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ```bash
 # Clone the repository
-git clone https://github.com/Joibel/mcp-for-argo-workflows.git
+git clone https://github.com/pipekit/mcp-for-argo-workflows.git
 cd mcp-for-argo-workflows
 
 # Install development tools

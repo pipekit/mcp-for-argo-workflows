@@ -4,10 +4,10 @@ package server
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo"
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/prompts"
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/resources"
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/prompts"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/resources"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/tools"
 )
 
 // Server wraps the MCP server and provides methods for managing tools and resources.

@@ -73,9 +73,9 @@ jobs:
           BUILD_TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 
           go build -ldflags="-s -w \
-            -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.Version=${VERSION}' \
-            -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.Commit=${COMMIT}' \
-            -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.BuildTime=${BUILD_TIME}'" \
+            -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.Version=${VERSION}' \
+            -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.Commit=${COMMIT}' \
+            -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.BuildTime=${BUILD_TIME}'" \
             -o mcp-for-argo-workflows-${{ matrix.suffix }} \
             ./cmd/mcp-for-argo-workflows
 
@@ -219,12 +219,12 @@ jobs:
 
             ### Docker
             ```bash
-            docker pull ghcr.io/joibel/mcp-for-argo-workflows:${{ steps.version.outputs.version }}
+            docker pull ghcr.io/pipekit/mcp-for-argo-workflows:${{ steps.version.outputs.version }}
             ```
 
             Available tags:
-            - `ghcr.io/joibel/mcp-for-argo-workflows:${{ steps.version.outputs.version }}`
-            - `ghcr.io/joibel/mcp-for-argo-workflows:latest`
+            - `ghcr.io/pipekit/mcp-for-argo-workflows:${{ steps.version.outputs.version }}`
+            - `ghcr.io/pipekit/mcp-for-argo-workflows:latest`
 
             ### Verify checksums
             ```bash

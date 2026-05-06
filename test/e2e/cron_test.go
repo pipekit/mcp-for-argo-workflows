@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/tools"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/tools"
 )
 
 // TestCronWorkflow_CRUD tests the full CRUD lifecycle: create → get → list → delete.

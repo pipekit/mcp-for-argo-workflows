@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 // newMockClient creates a mock Argo client with the specified namespace and mode.

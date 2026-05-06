@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/Joibel/mcp-for-argo-workflows/pkg/argo/mocks"
+	"github.com/pipekit/mcp-for-argo-workflows/pkg/argo/mocks"
 )
 
 func TestLogsWorkflowTool(t *testing.T) {

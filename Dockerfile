@@ -25,9 +25,9 @@ ARG BUILD_TIME=unknown
 # Note: Using single quotes around variable values to handle special characters safely
 RUN CGO_ENABLED=1 go build \
     -ldflags="-s -w \
-        -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.Version=${VERSION}' \
-        -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.Commit=${COMMIT}' \
-        -X 'github.com/Joibel/mcp-for-argo-workflows/internal/version.BuildTime=${BUILD_TIME}'" \
+        -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.Version=${VERSION}' \
+        -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.Commit=${COMMIT}' \
+        -X 'github.com/pipekit/mcp-for-argo-workflows/internal/version.BuildTime=${BUILD_TIME}'" \
     -o mcp-for-argo-workflows \
     ./cmd/mcp-for-argo-workflows
 
@@ -38,7 +38,7 @@ FROM gcr.io/distroless/base-debian12:nonroot@sha256:956eee19d77039968b05209dce21
 # Labels for container metadata
 LABEL org.opencontainers.image.title="MCP for Argo Workflows"
 LABEL org.opencontainers.image.description="MCP server for Argo Workflows providing AI tool access to workflow operations"
-LABEL org.opencontainers.image.source="https://github.com/Joibel/mcp-for-argo-workflows"
+LABEL org.opencontainers.image.source="https://github.com/pipekit/mcp-for-argo-workflows"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 
 # Copy binary from builder
