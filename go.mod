@@ -5,7 +5,7 @@ go 1.25.7
 require (
 	github.com/argoproj/argo-workflows/v4 v4.0.7
 	github.com/goccy/go-graphviz v0.2.10
-	github.com/modelcontextprotocol/go-sdk v1.6.0
+	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/k3s v0.43.0
