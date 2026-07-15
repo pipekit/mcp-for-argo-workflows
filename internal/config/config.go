@@ -40,6 +40,9 @@ type Config struct {
 
 	// HTTP1 forces HTTP/1.1 (REST) instead of gRPC for Argo Server
 	HTTP1 bool
+
+	// ReadOnly disables all mutating tools when enabled
+	ReadOnly bool
 }
 
 // DefaultConfig returns a Config with default values.
@@ -80,6 +83,7 @@ func NewFromFlags() (*Config, error) {
 	pflag.BoolVar(&cfg.Secure, "argo-secure", cfg.Secure, "Use TLS when connecting to Argo Server")
 	pflag.BoolVar(&cfg.InsecureSkipVerify, "argo-insecure-skip-verify", cfg.InsecureSkipVerify, "Skip TLS certificate verification")
 	pflag.BoolVar(&cfg.HTTP1, "argo-http1", cfg.HTTP1, "Use HTTP/1.1 (REST) instead of gRPC for Argo Server")
+	pflag.BoolVar(&cfg.ReadOnly, "read-only", cfg.ReadOnly, "Run in read-only mode, disabling all mutating tools")
 	pflag.StringVar(&cfg.Kubeconfig, "kubeconfig", cfg.Kubeconfig, "Path to kubeconfig file")
 	pflag.StringVar(&cfg.Context, "context", cfg.Context, "Kubernetes context to use")
 
@@ -148,6 +152,7 @@ func applyEnvOverridesWithFlagSet(fs *pflag.FlagSet, cfg *Config) {
 	cfg.Secure = getEnvBoolIfNotSet(fs, "argo-secure", "ARGO_SECURE", cfg.Secure)
 	cfg.InsecureSkipVerify = getEnvBoolIfNotSet(fs, "argo-insecure-skip-verify", "ARGO_INSECURE_SKIP_VERIFY", cfg.InsecureSkipVerify)
 	cfg.HTTP1 = getEnvBoolIfNotSet(fs, "argo-http1", "ARGO_HTTP1", cfg.HTTP1)
+	cfg.ReadOnly = getEnvBoolIfNotSet(fs, "read-only", "MCP_READ_ONLY", cfg.ReadOnly)
 
 	// Note: There's no standard env var for Kubernetes context,
 	// so --context is CLI-only

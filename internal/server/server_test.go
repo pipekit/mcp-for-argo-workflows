@@ -68,7 +68,19 @@ func TestRegisterTools(t *testing.T) {
 
 	// RegisterTools should not panic
 	assert.NotPanics(t, func() {
-		srv.RegisterTools(mockClient)
+		srv.RegisterTools(mockClient, false)
+	})
+}
+
+// TestRegisterToolsReadOnly tests that RegisterTools doesn't panic in read-only mode.
+func TestRegisterToolsReadOnly(t *testing.T) {
+	srv := NewServer("test-server", "1.0.0")
+	require.NotNil(t, srv)
+
+	mockClient := mocks.NewMockClient("default", false)
+
+	assert.NotPanics(t, func() {
+		srv.RegisterTools(mockClient, true)
 	})
 }
 
@@ -116,7 +128,7 @@ func TestServerRegistrationOrder(t *testing.T) {
 	// Order 1: Tools, Resources, ClusterResources, Prompts
 	srv1 := NewServer("test-server-1", "1.0.0")
 	assert.NotPanics(t, func() {
-		srv1.RegisterTools(mockClient)
+		srv1.RegisterTools(mockClient, false)
 		srv1.RegisterResources()
 		srv1.RegisterClusterResources(mockClient)
 		srv1.RegisterPrompts(mockClient)
@@ -128,7 +140,7 @@ func TestServerRegistrationOrder(t *testing.T) {
 		srv2.RegisterPrompts(mockClient)
 		srv2.RegisterClusterResources(mockClient)
 		srv2.RegisterResources()
-		srv2.RegisterTools(mockClient)
+		srv2.RegisterTools(mockClient, false)
 	})
 }
 
@@ -142,8 +154,8 @@ func TestMultipleRegistrations(t *testing.T) {
 	// Multiple registrations should not panic
 	// Note: This may result in duplicate registrations, but should not cause errors
 	assert.NotPanics(t, func() {
-		srv.RegisterTools(mockClient)
-		srv.RegisterTools(mockClient)
+		srv.RegisterTools(mockClient, false)
+		srv.RegisterTools(mockClient, false)
 		srv.RegisterResources()
 		srv.RegisterResources()
 	})
@@ -182,7 +194,7 @@ func TestServerWithDifferentClientModes(t *testing.T) {
 
 			// All registration functions should work regardless of client mode
 			assert.NotPanics(t, func() {
-				srv.RegisterTools(mockClient)
+				srv.RegisterTools(mockClient, false)
 				srv.RegisterResources()
 				srv.RegisterClusterResources(mockClient)
 				srv.RegisterPrompts(mockClient)

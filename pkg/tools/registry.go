@@ -11,13 +11,11 @@ import (
 // Each tool provides its own registrar that calls mcp.AddTool with the correct types.
 type ToolRegistrar func(s *mcp.Server, client argo.ClientInterface)
 
-// AllTools returns all tool registrars in the order they should be registered.
-func AllTools() []ToolRegistrar {
+// ReadOnlyTools returns tool registrars that do not mutate cluster state.
+func ReadOnlyTools() []ToolRegistrar {
 	return []ToolRegistrar{
-		RegisterSubmitWorkflow,
 		RegisterListWorkflows,
 		RegisterGetWorkflow,
-		RegisterDeleteWorkflow,
 		RegisterWatchWorkflow,
 		RegisterLogsWorkflow,
 		RegisterWaitWorkflow,
@@ -25,39 +23,52 @@ func AllTools() []ToolRegistrar {
 		RegisterLintWorkflowTemplate,
 		RegisterLintClusterWorkflowTemplate,
 		RegisterLintCronWorkflow,
+		RegisterRenderWorkflowGraph,
+		RegisterRenderManifestGraph,
+		RegisterListWorkflowTemplates,
+		RegisterGetWorkflowTemplate,
+		RegisterListClusterWorkflowTemplates,
+		RegisterGetClusterWorkflowTemplate,
+		RegisterListCronWorkflows,
+		RegisterGetCronWorkflow,
+		RegisterGetWorkflowNode,
+		RegisterConvertWorkflow,
+	}
+}
+
+// WriteTools returns tool registrars that mutate cluster or Argo state.
+func WriteTools() []ToolRegistrar {
+	return []ToolRegistrar{
+		RegisterSubmitWorkflow,
+		RegisterDeleteWorkflow,
 		RegisterRetryWorkflow,
 		RegisterResubmitWorkflow,
 		RegisterSuspendWorkflow,
 		RegisterResumeWorkflow,
 		RegisterStopWorkflow,
 		RegisterTerminateWorkflow,
-		RegisterRenderWorkflowGraph,
-		RegisterRenderManifestGraph,
-		RegisterListWorkflowTemplates,
-		RegisterGetWorkflowTemplate,
 		RegisterCreateWorkflowTemplate,
 		RegisterDeleteWorkflowTemplate,
-		RegisterListClusterWorkflowTemplates,
-		RegisterGetClusterWorkflowTemplate,
 		RegisterCreateClusterWorkflowTemplate,
 		RegisterDeleteClusterWorkflowTemplate,
-		RegisterListCronWorkflows,
-		RegisterGetCronWorkflow,
 		RegisterCreateCronWorkflow,
 		RegisterDeleteCronWorkflow,
 		RegisterSuspendCronWorkflow,
 		RegisterResumeCronWorkflow,
-		RegisterGetWorkflowNode,
 		RegisterDeleteArchivedWorkflow,
 		RegisterResubmitArchivedWorkflow,
 		RegisterRetryArchivedWorkflow,
-		RegisterConvertWorkflow,
 	}
 }
 
 // RegisterAll registers all tools with the MCP server.
-func RegisterAll(s *mcp.Server, client argo.ClientInterface) {
-	for _, register := range AllTools() {
+func RegisterAll(s *mcp.Server, client argo.ClientInterface, readOnly bool) {
+	registrars := ReadOnlyTools()
+	if !readOnly {
+		registrars = append(registrars, WriteTools()...)
+	}
+
+	for _, register := range registrars {
 		register(s, client)
 	}
 }

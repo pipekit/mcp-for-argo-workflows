@@ -61,7 +61,7 @@ func run(ctx context.Context) error {
 	srv := server.NewServer(serverName, version.Version)
 
 	// Register Argo Workflows tools
-	srv.RegisterTools(argoClient)
+	srv.RegisterTools(argoClient, cfg.ReadOnly)
 
 	// Register Argo CRD schema resources
 	srv.RegisterResources()
@@ -77,7 +77,12 @@ func run(ctx context.Context) error {
 		"version", version.Version,
 		"transport", cfg.Transport,
 		"namespace", cfg.Namespace,
+		"read_only", cfg.ReadOnly,
 	)
+
+	if cfg.ReadOnly {
+		slog.Info("read-only mode enabled: mutating tools are disabled")
+	}
 
 	// Start the server with the configured transport.
 	// The ctx here is the Argo SDK context (see nolint:contextcheck above).
