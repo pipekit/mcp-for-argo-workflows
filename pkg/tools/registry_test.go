@@ -21,7 +21,7 @@ func TestToolRegistrarsAreDerivedFromToolAnnotations(t *testing.T) {
 	fullSet := toRegistrarSet(toolRegistrars(false))
 
 	assert.NotEmpty(t, specs)
-	assert.Equal(t, len(specs), len(fullSet), "write mode should register all tools")
+	assert.Len(t, fullSet, len(specs), "write mode should register all tools")
 
 	for _, spec := range specs {
 		registrarPtr := reflect.ValueOf(spec.register).Pointer()

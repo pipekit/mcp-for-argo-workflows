@@ -11,6 +11,7 @@ import (
 // Each tool provides its own registrar that calls mcp.AddTool with the correct types.
 type ToolRegistrar func(s *mcp.Server, client argo.ClientInterface)
 
+// ToolDefinition is a function that returns the MCP tool definition.
 type ToolDefinition func() *mcp.Tool
 
 type toolSpec struct {
