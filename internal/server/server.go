@@ -32,9 +32,9 @@ func NewServer(name, version string) *Server {
 	}
 }
 
-// RegisterTools registers all Argo Workflows MCP tools with the server.
-func (s *Server) RegisterTools(client argo.ClientInterface) {
-	tools.RegisterAll(s.mcp, client)
+// RegisterTools registers Argo Workflows MCP tools with the server.
+func (s *Server) RegisterTools(client argo.ClientInterface, readOnly bool) {
+	tools.RegisterAll(s.mcp, client, readOnly)
 }
 
 // RegisterResources registers all Argo Workflows MCP resources with the server.

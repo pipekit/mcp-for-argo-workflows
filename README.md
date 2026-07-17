@@ -65,7 +65,7 @@ git clone https://github.com/pipekit/mcp-for-argo-workflows.git
 cd mcp-for-argo-workflows
 
 # Build the binary
-make build
+make build-all
 
 # The binary is created at bin/mcp-for-argo-workflows
 ```
@@ -163,6 +163,7 @@ Add to Cursor settings:
 | `ARGO_SECURE` | `--argo-secure` | `true` | Use TLS when connecting to Argo Server |
 | `ARGO_INSECURE_SKIP_VERIFY` | `--argo-insecure-skip-verify` | `false` | Skip TLS certificate verification |
 | `ARGO_HTTP1` | `--argo-http1` | `false` | Use HTTP/1.1 (REST) instead of gRPC for Argo Server. Required when the server is behind a reverse proxy (e.g. nginx ingress) that does not support gRPC |
+| `MCP_READ_ONLY` | `--read-only` | `false` | Disable mutating tools for monitoring/debugging-only access |
 
 **Precedence:** CLI flags > Environment variables > Default values
 
@@ -202,6 +203,18 @@ mcp-for-argo-workflows \
   --http-addr :8080 \
   --namespace argo
 ```
+
+#### Read-Only Mode
+
+Run the server in read-only mode to expose only non-mutating tools:
+
+```bash
+mcp-for-argo-workflows --read-only --namespace argo
+
+# or via env var
+MCP_READ_ONLY=true mcp-for-argo-workflows --namespace argo
+```
+
 
 #### Port-forwarded Argo Server
 

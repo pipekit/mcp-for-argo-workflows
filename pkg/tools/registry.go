@@ -11,53 +11,75 @@ import (
 // Each tool provides its own registrar that calls mcp.AddTool with the correct types.
 type ToolRegistrar func(s *mcp.Server, client argo.ClientInterface)
 
-// AllTools returns all tool registrars in the order they should be registered.
-func AllTools() []ToolRegistrar {
-	return []ToolRegistrar{
-		RegisterSubmitWorkflow,
-		RegisterListWorkflows,
-		RegisterGetWorkflow,
-		RegisterDeleteWorkflow,
-		RegisterWatchWorkflow,
-		RegisterLogsWorkflow,
-		RegisterWaitWorkflow,
-		RegisterLintWorkflow,
-		RegisterLintWorkflowTemplate,
-		RegisterLintClusterWorkflowTemplate,
-		RegisterLintCronWorkflow,
-		RegisterRetryWorkflow,
-		RegisterResubmitWorkflow,
-		RegisterSuspendWorkflow,
-		RegisterResumeWorkflow,
-		RegisterStopWorkflow,
-		RegisterTerminateWorkflow,
-		RegisterRenderWorkflowGraph,
-		RegisterRenderManifestGraph,
-		RegisterListWorkflowTemplates,
-		RegisterGetWorkflowTemplate,
-		RegisterCreateWorkflowTemplate,
-		RegisterDeleteWorkflowTemplate,
-		RegisterListClusterWorkflowTemplates,
-		RegisterGetClusterWorkflowTemplate,
-		RegisterCreateClusterWorkflowTemplate,
-		RegisterDeleteClusterWorkflowTemplate,
-		RegisterListCronWorkflows,
-		RegisterGetCronWorkflow,
-		RegisterCreateCronWorkflow,
-		RegisterDeleteCronWorkflow,
-		RegisterSuspendCronWorkflow,
-		RegisterResumeCronWorkflow,
-		RegisterGetWorkflowNode,
-		RegisterDeleteArchivedWorkflow,
-		RegisterResubmitArchivedWorkflow,
-		RegisterRetryArchivedWorkflow,
-		RegisterConvertWorkflow,
+// ToolDefinition is a function that returns the MCP tool definition.
+type ToolDefinition func() *mcp.Tool
+
+type toolSpec struct {
+	register ToolRegistrar
+	tool     ToolDefinition
+}
+
+func allToolSpecs() []toolSpec {
+	return []toolSpec{
+		{register: RegisterSubmitWorkflow, tool: SubmitWorkflowTool},
+		{register: RegisterListWorkflows, tool: ListWorkflowsTool},
+		{register: RegisterGetWorkflow, tool: GetWorkflowTool},
+		{register: RegisterDeleteWorkflow, tool: DeleteWorkflowTool},
+		{register: RegisterWatchWorkflow, tool: WatchWorkflowTool},
+		{register: RegisterLogsWorkflow, tool: LogsWorkflowTool},
+		{register: RegisterWaitWorkflow, tool: WaitWorkflowTool},
+		{register: RegisterLintWorkflow, tool: LintWorkflowTool},
+		{register: RegisterLintWorkflowTemplate, tool: LintWorkflowTemplateTool},
+		{register: RegisterLintClusterWorkflowTemplate, tool: LintClusterWorkflowTemplateTool},
+		{register: RegisterLintCronWorkflow, tool: LintCronWorkflowTool},
+		{register: RegisterRetryWorkflow, tool: RetryWorkflowTool},
+		{register: RegisterResubmitWorkflow, tool: ResubmitWorkflowTool},
+		{register: RegisterSuspendWorkflow, tool: SuspendWorkflowTool},
+		{register: RegisterResumeWorkflow, tool: ResumeWorkflowTool},
+		{register: RegisterStopWorkflow, tool: StopWorkflowTool},
+		{register: RegisterTerminateWorkflow, tool: TerminateWorkflowTool},
+		{register: RegisterRenderWorkflowGraph, tool: RenderWorkflowGraphTool},
+		{register: RegisterRenderManifestGraph, tool: RenderManifestGraphTool},
+		{register: RegisterListWorkflowTemplates, tool: ListWorkflowTemplatesTool},
+		{register: RegisterGetWorkflowTemplate, tool: GetWorkflowTemplateTool},
+		{register: RegisterCreateWorkflowTemplate, tool: CreateWorkflowTemplateTool},
+		{register: RegisterDeleteWorkflowTemplate, tool: DeleteWorkflowTemplateTool},
+		{register: RegisterListClusterWorkflowTemplates, tool: ListClusterWorkflowTemplatesTool},
+		{register: RegisterGetClusterWorkflowTemplate, tool: GetClusterWorkflowTemplateTool},
+		{register: RegisterCreateClusterWorkflowTemplate, tool: CreateClusterWorkflowTemplateTool},
+		{register: RegisterDeleteClusterWorkflowTemplate, tool: DeleteClusterWorkflowTemplateTool},
+		{register: RegisterListCronWorkflows, tool: ListCronWorkflowsTool},
+		{register: RegisterGetCronWorkflow, tool: GetCronWorkflowTool},
+		{register: RegisterCreateCronWorkflow, tool: CreateCronWorkflowTool},
+		{register: RegisterDeleteCronWorkflow, tool: DeleteCronWorkflowTool},
+		{register: RegisterSuspendCronWorkflow, tool: SuspendCronWorkflowTool},
+		{register: RegisterResumeCronWorkflow, tool: ResumeCronWorkflowTool},
+		{register: RegisterGetWorkflowNode, tool: GetWorkflowNodeTool},
+		{register: RegisterDeleteArchivedWorkflow, tool: DeleteArchivedWorkflowTool},
+		{register: RegisterResubmitArchivedWorkflow, tool: ResubmitArchivedWorkflowTool},
+		{register: RegisterRetryArchivedWorkflow, tool: RetryArchivedWorkflowTool},
+		{register: RegisterConvertWorkflow, tool: ConvertWorkflowTool},
 	}
 }
 
+func isReadOnlyTool(t *mcp.Tool) bool {
+	return t.Annotations != nil && t.Annotations.ReadOnlyHint
+}
+
+func toolRegistrars(readOnly bool) []ToolRegistrar {
+	registrars := make([]ToolRegistrar, 0, len(allToolSpecs()))
+	for _, spec := range allToolSpecs() {
+		if readOnly && !isReadOnlyTool(spec.tool()) {
+			continue
+		}
+		registrars = append(registrars, spec.register)
+	}
+	return registrars
+}
+
 // RegisterAll registers all tools with the MCP server.
-func RegisterAll(s *mcp.Server, client argo.ClientInterface) {
-	for _, register := range AllTools() {
+func RegisterAll(s *mcp.Server, client argo.ClientInterface, readOnly bool) {
+	for _, register := range toolRegistrars(readOnly) {
 		register(s, client)
 	}
 }
