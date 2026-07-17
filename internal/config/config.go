@@ -52,6 +52,7 @@ func DefaultConfig() *Config {
 		HTTPAddr:  ":8080",
 		Namespace: "default",
 		Secure:    true,
+		ReadOnly:  false,
 	}
 }
 

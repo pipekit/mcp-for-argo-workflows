@@ -93,6 +93,7 @@ The deployment can be configured via environment variables in `deployment.yaml`:
 | `ARGO_NAMESPACE` | Default namespace | `argo` |
 | `ARGO_SERVER` | Argo Server address (optional) | - |
 | `ARGO_TOKEN` | Auth token (optional) | - |
+| `MCP_READ_ONLY` | Only expose read only tools (optional) | `false` |
 
 ### Using Argo Server
 
