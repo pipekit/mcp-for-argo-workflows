@@ -17,19 +17,36 @@ func toRegistrarSet(registrars []ToolRegistrar) map[uintptr]struct{} {
 
 func TestToolRegistrarsAreDerivedFromToolAnnotations(t *testing.T) {
 	specs := allToolSpecs()
-	readOnlySet := toRegistrarSet(toolRegistrars(true))
-	fullSet := toRegistrarSet(toolRegistrars(false))
-
 	assert.NotEmpty(t, specs)
-	assert.Len(t, fullSet, len(specs), "write mode should register all tools")
 
-	for _, spec := range specs {
-		registrarPtr := reflect.ValueOf(spec.register).Pointer()
-		_, inFull := fullSet[registrarPtr]
-		_, inReadOnly := readOnlySet[registrarPtr]
-		readonlyHint := isReadOnlyTool(spec.tool())
+	for _, multiContext := range []bool{false, true} {
+		readOnlySet := toRegistrarSet(toolRegistrars(true, multiContext))
+		fullSet := toRegistrarSet(toolRegistrars(false, multiContext))
 
-		assert.True(t, inFull)
-		assert.Equal(t, readonlyHint, inReadOnly)
+		for _, spec := range specs {
+			registrarPtr := reflect.ValueOf(spec.register).Pointer()
+			_, inFull := fullSet[registrarPtr]
+			_, inReadOnly := readOnlySet[registrarPtr]
+
+			if spec.multiContextOnly && !multiContext {
+				assert.False(t, inFull, "multi-context-only tool registered without multi-context")
+				assert.False(t, inReadOnly, "multi-context-only tool registered without multi-context")
+				continue
+			}
+
+			assert.True(t, inFull)
+			assert.Equal(t, isReadOnlyTool(spec.tool()), inReadOnly)
+		}
 	}
+}
+
+func TestListContextsIsMultiContextOnly(t *testing.T) {
+	found := false
+	for _, spec := range allToolSpecs() {
+		if spec.tool().Name == ListContextsToolName {
+			found = true
+			assert.True(t, spec.multiContextOnly, "list_contexts must only register when multi-context is enabled")
+		}
+	}
+	assert.True(t, found, "list_contexts must be in the tool registry")
 }

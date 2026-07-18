@@ -41,6 +41,8 @@ const nodeColorDefault = "#9ca3af"
 
 // RenderWorkflowGraphInput defines the input parameters for the render_workflow_graph tool.
 type RenderWorkflowGraphInput struct {
+	KubeContextInput
+
 	// IncludeStatus indicates whether to include node execution status with colors.
 	IncludeStatus *bool `json:"includeStatus,omitempty" jsonschema:"Include node execution status with colours (default: true)"`
 
@@ -78,8 +80,13 @@ func RenderWorkflowGraphTool() *mcp.Tool {
 }
 
 // RenderWorkflowGraphHandler returns a handler function for the render_workflow_graph tool.
-func RenderWorkflowGraphHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RenderWorkflowGraphInput) (*mcp.CallToolResult, *RenderWorkflowGraphOutput, error) {
+func RenderWorkflowGraphHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RenderWorkflowGraphInput) (*mcp.CallToolResult, *RenderWorkflowGraphOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input RenderWorkflowGraphInput) (*mcp.CallToolResult, *RenderWorkflowGraphOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate name is provided
 		if strings.TrimSpace(input.Name) == "" {
 			return nil, nil, fmt.Errorf("workflow name cannot be empty")

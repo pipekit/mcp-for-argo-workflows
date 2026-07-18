@@ -20,6 +20,8 @@ import (
 
 // WatchWorkflowInput defines the input parameters for the watch_workflow tool.
 type WatchWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -90,8 +92,13 @@ func WatchWorkflowTool() *mcp.Tool {
 }
 
 // WatchWorkflowHandler returns a handler function for the watch_workflow tool.
-func WatchWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, WatchWorkflowInput) (*mcp.CallToolResult, *WatchWorkflowOutput, error) {
+func WatchWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, WatchWorkflowInput) (*mcp.CallToolResult, *WatchWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input WatchWorkflowInput) (*mcp.CallToolResult, *WatchWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

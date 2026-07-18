@@ -15,6 +15,8 @@ import (
 
 // RetryWorkflowInput defines the input parameters for the retry_workflow tool.
 type RetryWorkflowInput struct {
+	KubeContextInput
+
 	Namespace         string   `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 	Name              string   `json:"name" jsonschema:"Workflow name,required"`
 	NodeFieldSelector string   `json:"nodeFieldSelector,omitempty" jsonschema:"Selector for nodes to restart (e.g. phase=Failed)"`
@@ -52,8 +54,13 @@ func RetryWorkflowTool() *mcp.Tool {
 }
 
 // RetryWorkflowHandler returns a handler function for the retry_workflow tool.
-func RetryWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RetryWorkflowInput) (*mcp.CallToolResult, *RetryWorkflowOutput, error) {
+func RetryWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RetryWorkflowInput) (*mcp.CallToolResult, *RetryWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input RetryWorkflowInput) (*mcp.CallToolResult, *RetryWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName := strings.TrimSpace(input.Name)
 		if workflowName == "" {

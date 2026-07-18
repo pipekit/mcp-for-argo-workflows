@@ -15,6 +15,8 @@ import (
 
 // ListCronWorkflowsInput defines the input parameters for the list_cron_workflows tool.
 type ListCronWorkflowsInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -53,8 +55,13 @@ func ListCronWorkflowsTool() *mcp.Tool {
 }
 
 // ListCronWorkflowsHandler returns a handler function for the list_cron_workflows tool.
-func ListCronWorkflowsHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListCronWorkflowsInput) (*mcp.CallToolResult, *ListCronWorkflowsOutput, error) {
+func ListCronWorkflowsHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListCronWorkflowsInput) (*mcp.CallToolResult, *ListCronWorkflowsOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ListCronWorkflowsInput) (*mcp.CallToolResult, *ListCronWorkflowsOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Determine namespace
 		namespace := input.Namespace
 		if namespace == "" {

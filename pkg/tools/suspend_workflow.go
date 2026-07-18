@@ -14,6 +14,8 @@ import (
 
 // SuspendWorkflowInput defines the input parameters for the suspend_workflow tool.
 type SuspendWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -48,8 +50,13 @@ func SuspendWorkflowTool() *mcp.Tool {
 }
 
 // SuspendWorkflowHandler returns a handler function for the suspend_workflow tool.
-func SuspendWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, SuspendWorkflowInput) (*mcp.CallToolResult, *SuspendWorkflowOutput, error) {
+func SuspendWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, SuspendWorkflowInput) (*mcp.CallToolResult, *SuspendWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SuspendWorkflowInput) (*mcp.CallToolResult, *SuspendWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

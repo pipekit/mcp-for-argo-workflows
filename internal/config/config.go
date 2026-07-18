@@ -20,39 +20,51 @@ const (
 )
 
 // Config holds the combined configuration for the MCP server.
+// Fields are ordered for memory alignment rather than by topic.
 type Config struct {
-	// Server settings
-	Transport string // "stdio" or "http"
-	HTTPAddr  string // HTTP listen address (e.g., ":8080")
-
-	// Argo connection settings
-	ArgoServer string // Argo Server host:port (empty = direct K8s)
-	ArgoToken  string // Bearer token for Argo Server auth
-	Namespace  string // Default namespace for operations
-
-	// Kubernetes settings (when not using Argo Server)
-	Kubeconfig string // Path to kubeconfig file
-	Context    string // Kubernetes context to use
-
-	// TLS settings (grouped together for alignment)
-	Secure             bool // Use TLS when connecting to Argo Server
-	InsecureSkipVerify bool // Skip TLS certificate verification
-
-	// HTTP1 forces HTTP/1.1 (REST) instead of gRPC for Argo Server
+	// Context is the Kubernetes context to use (direct K8s mode only).
+	Context string
+	// Transport is the MCP transport mode: "stdio" or "http".
+	Transport string
+	// ArgoServer is the Argo Server host:port (empty = direct K8s).
+	ArgoServer string
+	// ArgoToken is the bearer token for Argo Server auth.
+	ArgoToken string
+	// Namespace is the default namespace for operations.
+	Namespace string
+	// Kubeconfig is the path to the kubeconfig file (direct K8s mode only).
+	Kubeconfig string
+	// HTTPAddr is the HTTP listen address (e.g., ":8080").
+	HTTPAddr string
+	// AllowedContexts restricts which kubeconfig contexts may be used when
+	// multi-context is enabled. Empty means all contexts are allowed.
+	AllowedContexts []string
+	// InsecureSkipVerify skips TLS certificate verification.
+	InsecureSkipVerify bool
+	// HTTP1 forces HTTP/1.1 (REST) instead of gRPC for Argo Server.
 	HTTP1 bool
-
-	// ReadOnly disables all mutating tools when enabled
+	// ReadOnly disables all mutating tools when enabled.
 	ReadOnly bool
+	// MultiContext allows tools to select a kubeconfig context per call.
+	// Only effective in direct Kubernetes mode with stdio transport.
+	MultiContext bool
+	// Secure enables TLS when connecting to Argo Server.
+	Secure bool
+	// multiContextExplicit records whether MultiContext was set explicitly
+	// via flag or environment rather than defaulted, so Validate can reject
+	// an explicit enable in modes where it cannot take effect.
+	multiContextExplicit bool
 }
 
 // DefaultConfig returns a Config with default values.
 func DefaultConfig() *Config {
 	return &Config{
-		Transport: TransportStdio,
-		HTTPAddr:  ":8080",
-		Namespace: "default",
-		Secure:    true,
-		ReadOnly:  false,
+		Transport:    TransportStdio,
+		HTTPAddr:     ":8080",
+		Namespace:    "default",
+		Secure:       true,
+		ReadOnly:     false,
+		MultiContext: true,
 	}
 }
 
@@ -67,6 +79,39 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("http-addr is required when using HTTP transport")
 	}
 
+	if err := c.validateMultiContext(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateMultiContext normalizes the allowed-contexts list and rejects
+// multi-context settings that cannot take effect, so an operator never runs
+// believing a restriction is active when the feature is off.
+func (c *Config) validateMultiContext() error {
+	if len(c.AllowedContexts) > 0 {
+		normalized := make([]string, 0, len(c.AllowedContexts))
+		for _, name := range c.AllowedContexts {
+			if name = strings.TrimSpace(name); name != "" {
+				normalized = append(normalized, name)
+			}
+		}
+		if len(normalized) == 0 {
+			return fmt.Errorf("allowed-contexts is set but contains no context names")
+		}
+		c.AllowedContexts = normalized
+	}
+
+	if c.MultiContextEnabled() {
+		return nil
+	}
+	if len(c.AllowedContexts) > 0 {
+		return fmt.Errorf("allowed-contexts requires multi-context mode: direct Kubernetes mode (no argo-server), stdio transport, and multi-context enabled")
+	}
+	if c.multiContextExplicit && c.MultiContext {
+		return fmt.Errorf("multi-context requires direct Kubernetes mode (no argo-server) and stdio transport")
+	}
 	return nil
 }
 
@@ -87,6 +132,8 @@ func NewFromFlags() (*Config, error) {
 	pflag.BoolVar(&cfg.ReadOnly, "read-only", cfg.ReadOnly, "Run in read-only mode, disabling all mutating tools")
 	pflag.StringVar(&cfg.Kubeconfig, "kubeconfig", cfg.Kubeconfig, "Path to kubeconfig file")
 	pflag.StringVar(&cfg.Context, "context", cfg.Context, "Kubernetes context to use")
+	pflag.BoolVar(&cfg.MultiContext, "multi-context", cfg.MultiContext, "Allow tools to select a kubeconfig context per call (direct K8s mode with stdio transport only)")
+	pflag.StringSliceVar(&cfg.AllowedContexts, "allowed-contexts", cfg.AllowedContexts, "Kubeconfig contexts permitted for per-call selection (empty = all)")
 
 	// Parse CLI flags
 	pflag.Parse()
@@ -155,8 +202,23 @@ func applyEnvOverridesWithFlagSet(fs *pflag.FlagSet, cfg *Config) {
 	cfg.HTTP1 = getEnvBoolIfNotSet(fs, "argo-http1", "ARGO_HTTP1", cfg.HTTP1)
 	cfg.ReadOnly = getEnvBoolIfNotSet(fs, "read-only", "MCP_READ_ONLY", cfg.ReadOnly)
 
+	cfg.MultiContext = getEnvBoolIfNotSet(fs, "multi-context", "MCP_MULTI_CONTEXT", cfg.MultiContext)
+	cfg.multiContextExplicit = fs.Changed("multi-context") || os.Getenv("MCP_MULTI_CONTEXT") != ""
+	if !fs.Changed("allowed-contexts") {
+		if v := os.Getenv("MCP_ALLOWED_CONTEXTS"); v != "" {
+			cfg.AllowedContexts = strings.Split(v, ",")
+		}
+	}
+
 	// Note: There's no standard env var for Kubernetes context,
 	// so --context is CLI-only
+}
+
+// MultiContextEnabled reports whether tools may select a kubeconfig context
+// per call. This requires direct Kubernetes mode (no Argo Server), stdio
+// transport, and multi-context not being disabled.
+func (c *Config) MultiContextEnabled() bool {
+	return c.MultiContext && c.ArgoServer == "" && c.Transport == TransportStdio
 }
 
 // ToArgoConfig converts the Config to an argo.Config for creating the Argo client.

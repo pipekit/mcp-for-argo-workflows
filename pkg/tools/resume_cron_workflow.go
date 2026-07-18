@@ -15,6 +15,8 @@ import (
 
 // ResumeCronWorkflowInput defines the input parameters for the resume_cron_workflow tool.
 type ResumeCronWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -43,8 +45,13 @@ func ResumeCronWorkflowTool() *mcp.Tool {
 }
 
 // ResumeCronWorkflowHandler returns a handler function for the resume_cron_workflow tool.
-func ResumeCronWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResumeCronWorkflowInput) (*mcp.CallToolResult, *ResumeCronWorkflowOutput, error) {
+func ResumeCronWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResumeCronWorkflowInput) (*mcp.CallToolResult, *ResumeCronWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ResumeCronWorkflowInput) (*mcp.CallToolResult, *ResumeCronWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		name, err := ValidateName(input.Name)
 		if err != nil {

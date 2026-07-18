@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"strings"
 
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient"
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient/clusterworkflowtemplate"
@@ -21,6 +22,10 @@ var (
 	// ErrArchivedWorkflowsNotSupported is returned when trying to access archived workflows
 	// in direct Kubernetes API mode.
 	ErrArchivedWorkflowsNotSupported = errors.New("archived workflows are only supported with Argo Server connection")
+
+	// ErrMultiContextUnavailable is returned when a kubeconfig context is requested
+	// but per-call context selection is not available.
+	ErrMultiContextUnavailable = errors.New("selecting a kubeconfig context per call is not available (requires direct Kubernetes mode, stdio transport, and multi-context enabled)")
 )
 
 // ClientInterface defines the interface for interacting with Argo Workflows.
@@ -52,6 +57,20 @@ type ClientInterface interface {
 
 	// Context returns the context associated with this client.
 	Context() context.Context
+
+	// ForKubeContext returns a client bound to the named kubeconfig context.
+	// An empty name returns the receiver. It returns ErrMultiContextUnavailable
+	// when per-call context selection is not available.
+	ForKubeContext(name string) (ClientInterface, error)
+
+	// ListKubeContexts returns the kubeconfig context names available for
+	// per-call selection, along with the default context name. It returns
+	// ErrMultiContextUnavailable when per-call context selection is not available.
+	ListKubeContexts() (names []string, defaultContext string, err error)
+
+	// MultiContextEnabled reports whether per-call kubeconfig context selection
+	// is available on this client.
+	MultiContextEnabled() bool
 }
 
 // Ensure Client implements ClientInterface.
@@ -196,6 +215,31 @@ func (c *Client) DefaultNamespace() string {
 // Context returns the context associated with this client.
 func (c *Client) Context() context.Context {
 	return c.ctx
+}
+
+// ForKubeContext returns the receiver for an empty context name and
+// ErrMultiContextUnavailable otherwise: a plain Client is bound to a single
+// kubeconfig context for its lifetime. This rejection is the call-time
+// enforcement that keeps context selection unavailable in Argo Server mode,
+// HTTP transport, or when multi-context is disabled, regardless of what a
+// caller sends.
+func (c *Client) ForKubeContext(name string) (ClientInterface, error) {
+	if strings.TrimSpace(name) == "" {
+		return c, nil
+	}
+	return nil, ErrMultiContextUnavailable
+}
+
+// ListKubeContexts returns ErrMultiContextUnavailable: a plain Client does not
+// support per-call context selection.
+func (c *Client) ListKubeContexts() ([]string, string, error) {
+	return nil, "", ErrMultiContextUnavailable
+}
+
+// MultiContextEnabled reports false: a plain Client is bound to a single
+// kubeconfig context.
+func (c *Client) MultiContextEnabled() bool {
+	return false
 }
 
 // buildLoadingRules constructs kubeconfig loading rules from a path string.

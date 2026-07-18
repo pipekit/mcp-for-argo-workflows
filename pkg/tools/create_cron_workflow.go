@@ -20,6 +20,8 @@ import (
 
 // CreateCronWorkflowInput defines the input parameters for the create_cron_workflow tool.
 type CreateCronWorkflowInput struct {
+	KubeContextInput
+
 	// Manifest is the YAML manifest of the CronWorkflow to create (required).
 	Manifest string `json:"manifest" jsonschema:"CronWorkflow YAML manifest,required"`
 
@@ -54,8 +56,13 @@ func CreateCronWorkflowTool() *mcp.Tool {
 }
 
 // CreateCronWorkflowHandler returns a handler function for the create_cron_workflow tool.
-func CreateCronWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateCronWorkflowInput) (*mcp.CallToolResult, *CreateCronWorkflowOutput, error) {
+func CreateCronWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateCronWorkflowInput) (*mcp.CallToolResult, *CreateCronWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CreateCronWorkflowInput) (*mcp.CallToolResult, *CreateCronWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

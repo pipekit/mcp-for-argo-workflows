@@ -16,6 +16,8 @@ import (
 
 // LintClusterWorkflowTemplateInput defines the input parameters for the lint_cluster_workflow_template tool.
 type LintClusterWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Manifest is the ClusterWorkflowTemplate YAML manifest to validate.
 	Manifest string `json:"manifest" jsonschema:"ClusterWorkflowTemplate YAML manifest to validate,required"`
 }
@@ -39,8 +41,13 @@ func LintClusterWorkflowTemplateTool() *mcp.Tool {
 }
 
 // LintClusterWorkflowTemplateHandler returns a handler function for the lint_cluster_workflow_template tool.
-func LintClusterWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LintClusterWorkflowTemplateInput) (*mcp.CallToolResult, *LintClusterWorkflowTemplateOutput, error) {
+func LintClusterWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LintClusterWorkflowTemplateInput) (*mcp.CallToolResult, *LintClusterWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input LintClusterWorkflowTemplateInput) (*mcp.CallToolResult, *LintClusterWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

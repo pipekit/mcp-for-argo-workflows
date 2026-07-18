@@ -14,6 +14,8 @@ import (
 
 // GetClusterWorkflowTemplateInput defines the input parameters for the get_cluster_workflow_template tool.
 type GetClusterWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Name is the cluster workflow template name (required).
 	Name string `json:"name" jsonschema:"ClusterWorkflowTemplate name,required"`
 }
@@ -42,8 +44,13 @@ func GetClusterWorkflowTemplateTool() *mcp.Tool {
 }
 
 // GetClusterWorkflowTemplateHandler returns a handler function for the get_cluster_workflow_template tool.
-func GetClusterWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetClusterWorkflowTemplateInput) (*mcp.CallToolResult, *GetClusterWorkflowTemplateOutput, error) {
+func GetClusterWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetClusterWorkflowTemplateInput) (*mcp.CallToolResult, *GetClusterWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input GetClusterWorkflowTemplateInput) (*mcp.CallToolResult, *GetClusterWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate required input
 		if input.Name == "" {
 			return nil, nil, fmt.Errorf("name is required")

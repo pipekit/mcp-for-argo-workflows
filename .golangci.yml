@@ -108,6 +108,15 @@ linters:
         linters:
           - ireturn    # Returns Argo SDK interfaces by design
 
+      # Multi-context client resolution returns ClientInterface by design
+      - path: pkg/argo/multicontext\.go
+        linters:
+          - ireturn    # ForKubeContext returns ClientInterface so handlers stay client-agnostic
+
+      - path: pkg/tools/helpers\.go
+        linters:
+          - ireturn    # ResolveClient returns ClientInterface so handlers stay client-agnostic
+
 formatters:
   enable:
     - gofmt

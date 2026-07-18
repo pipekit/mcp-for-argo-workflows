@@ -20,6 +20,8 @@ import (
 
 // WaitWorkflowInput defines the input parameters for the wait_workflow tool.
 type WaitWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -72,8 +74,13 @@ func WaitWorkflowTool() *mcp.Tool {
 }
 
 // WaitWorkflowHandler returns a handler function for the wait_workflow tool.
-func WaitWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, WaitWorkflowInput) (*mcp.CallToolResult, *WaitWorkflowOutput, error) {
+func WaitWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, WaitWorkflowInput) (*mcp.CallToolResult, *WaitWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input WaitWorkflowInput) (*mcp.CallToolResult, *WaitWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

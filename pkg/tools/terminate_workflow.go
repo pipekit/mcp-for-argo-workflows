@@ -14,6 +14,8 @@ import (
 
 // TerminateWorkflowInput defines the input parameters for the terminate_workflow tool.
 type TerminateWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -48,8 +50,13 @@ func TerminateWorkflowTool() *mcp.Tool {
 }
 
 // TerminateWorkflowHandler returns a handler function for the terminate_workflow tool.
-func TerminateWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, TerminateWorkflowInput) (*mcp.CallToolResult, *TerminateWorkflowOutput, error) {
+func TerminateWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, TerminateWorkflowInput) (*mcp.CallToolResult, *TerminateWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input TerminateWorkflowInput) (*mcp.CallToolResult, *TerminateWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

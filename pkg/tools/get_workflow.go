@@ -16,6 +16,8 @@ import (
 
 // GetWorkflowInput defines the input parameters for the get_workflow tool.
 type GetWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -97,8 +99,13 @@ func GetWorkflowTool() *mcp.Tool {
 }
 
 // GetWorkflowHandler returns a handler function for the get_workflow tool.
-func GetWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetWorkflowInput) (*mcp.CallToolResult, *GetWorkflowOutput, error) {
+func GetWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetWorkflowInput) (*mcp.CallToolResult, *GetWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input GetWorkflowInput) (*mcp.CallToolResult, *GetWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate name is provided
 		if strings.TrimSpace(input.Name) == "" {
 			return nil, nil, fmt.Errorf("workflow name cannot be empty")

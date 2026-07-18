@@ -3,6 +3,7 @@ package mocks
 
 import (
 	"context"
+	"strings"
 
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient/clusterworkflowtemplate"
 	"github.com/argoproj/argo-workflows/v4/pkg/apiclient/cronworkflow"
@@ -24,9 +25,10 @@ type MockClient struct {
 	cronWorkflowService            cronworkflow.CronWorkflowServiceClient
 	archivedWorkflowService        workflowarchive.ArchivedWorkflowServiceClient
 	// ctx mirrors the real Client's context field for testing.
-	ctx            context.Context //nolint:containedctx // Mirrors real Client's Argo SDK pattern
-	namespace      string
-	argoServerMode bool
+	ctx                 context.Context //nolint:containedctx // Mirrors real Client's Argo SDK pattern
+	namespace           string
+	argoServerMode      bool
+	multiContextEnabled bool
 }
 
 // Ensure MockClient implements argo.ClientInterface.
@@ -168,4 +170,43 @@ func (m *MockClient) Context() context.Context {
 		return m.ctx
 	}
 	return context.Background()
+}
+
+// SetMultiContextEnabled sets whether this mock reports per-call kubeconfig
+// context selection as available.
+func (m *MockClient) SetMultiContextEnabled(enabled bool) {
+	m.multiContextEnabled = enabled
+}
+
+// ForKubeContext returns the receiver for an empty name; otherwise it
+// delegates to testify expectations.
+func (m *MockClient) ForKubeContext(name string) (argo.ClientInterface, error) {
+	if strings.TrimSpace(name) == "" {
+		return m, nil
+	}
+	args := m.Called(name)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	client, ok := args.Get(0).(argo.ClientInterface)
+	if !ok {
+		return nil, args.Error(1)
+	}
+	return client, args.Error(1)
+}
+
+// ListKubeContexts delegates to testify expectations.
+func (m *MockClient) ListKubeContexts() ([]string, string, error) {
+	args := m.Called()
+	names, ok := args.Get(0).([]string)
+	if !ok {
+		return nil, args.String(1), args.Error(2)
+	}
+	return names, args.String(1), args.Error(2)
+}
+
+// MultiContextEnabled reports whether per-call kubeconfig context selection is
+// available on this mock.
+func (m *MockClient) MultiContextEnabled() bool {
+	return m.multiContextEnabled
 }

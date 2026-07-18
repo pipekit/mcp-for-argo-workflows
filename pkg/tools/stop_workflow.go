@@ -15,6 +15,8 @@ import (
 
 // StopWorkflowInput defines the input parameters for the stop_workflow tool.
 type StopWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -55,8 +57,13 @@ func StopWorkflowTool() *mcp.Tool {
 }
 
 // StopWorkflowHandler returns a handler function for the stop_workflow tool.
-func StopWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, StopWorkflowInput) (*mcp.CallToolResult, *StopWorkflowOutput, error) {
+func StopWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, StopWorkflowInput) (*mcp.CallToolResult, *StopWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input StopWorkflowInput) (*mcp.CallToolResult, *StopWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName := strings.TrimSpace(input.Name)
 		if workflowName == "" {
