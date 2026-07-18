@@ -26,6 +26,8 @@ var ValidWorkflowPhases = map[string]bool{
 
 // ListWorkflowsInput defines the input parameters for the list_workflows tool.
 type ListWorkflowsInput struct {
+	KubeContextInput
+
 	Namespace *string  `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified. use empty string for all namespaces)"`
 	Labels    string   `json:"labels,omitempty" jsonschema:"Label selector (e.g. 'app=myapp,env=prod')"`
 	Status    []string `json:"status,omitempty" jsonschema:"Filter by phase: Pending Running Succeeded Failed Error"`
@@ -74,8 +76,13 @@ func ListWorkflowsTool() *mcp.Tool {
 }
 
 // ListWorkflowsHandler returns a handler function for the list_workflows tool.
-func ListWorkflowsHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListWorkflowsInput) (*mcp.CallToolResult, *ListWorkflowsOutput, error) {
+func ListWorkflowsHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListWorkflowsInput) (*mcp.CallToolResult, *ListWorkflowsOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ListWorkflowsInput) (*mcp.CallToolResult, *ListWorkflowsOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Determine namespace
 		namespace := client.DefaultNamespace()
 		if input.Namespace != nil {

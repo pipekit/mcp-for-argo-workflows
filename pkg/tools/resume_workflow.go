@@ -14,6 +14,8 @@ import (
 
 // ResumeWorkflowInput defines the input parameters for the resume_workflow tool.
 type ResumeWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -51,8 +53,13 @@ func ResumeWorkflowTool() *mcp.Tool {
 }
 
 // ResumeWorkflowHandler returns a handler function for the resume_workflow tool.
-func ResumeWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResumeWorkflowInput) (*mcp.CallToolResult, *ResumeWorkflowOutput, error) {
+func ResumeWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResumeWorkflowInput) (*mcp.CallToolResult, *ResumeWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ResumeWorkflowInput) (*mcp.CallToolResult, *ResumeWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

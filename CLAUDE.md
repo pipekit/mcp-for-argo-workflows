@@ -71,6 +71,8 @@ Environment variables / CLI flags:
 - `MCP_TRANSPORT` / `--transport` — `stdio` (default) or `http`
 - `MCP_HTTP_ADDR` / `--http-addr` — HTTP listen address (default `:8080`)
 - `KUBECONFIG` / `--kubeconfig` — Path to kubeconfig (when not using Argo Server)
+- `MCP_MULTI_CONTEXT` / `--multi-context` — Per-call kubeconfig context selection (default `true`; direct K8s + stdio only)
+- `MCP_ALLOWED_CONTEXTS` / `--allowed-contexts` — Allowlist of selectable contexts (empty = all)
 
 ## MCP Tools
 
@@ -106,6 +108,10 @@ The server exposes these tool categories:
 
 ### Node Operations
 - `get_workflow_node`, `set_workflow_node`
+
+### Multi-Context (direct K8s mode + stdio transport only)
+- `list_contexts` — List kubeconfig context names selectable per call
+- Cluster-facing tools accept an optional `context` parameter (kubeconfig context name); on by default, disabled with `--multi-context=false`, restricted with `--allowed-contexts`
 
 ## Development Notes
 

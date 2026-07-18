@@ -15,6 +15,8 @@ import (
 
 // ListWorkflowTemplatesInput defines the input parameters for the list_workflow_templates tool.
 type ListWorkflowTemplatesInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -55,8 +57,13 @@ func ListWorkflowTemplatesTool() *mcp.Tool {
 }
 
 // ListWorkflowTemplatesHandler returns a handler function for the list_workflow_templates tool.
-func ListWorkflowTemplatesHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListWorkflowTemplatesInput) (*mcp.CallToolResult, *ListWorkflowTemplatesOutput, error) {
+func ListWorkflowTemplatesHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListWorkflowTemplatesInput) (*mcp.CallToolResult, *ListWorkflowTemplatesOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ListWorkflowTemplatesInput) (*mcp.CallToolResult, *ListWorkflowTemplatesOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Determine namespace
 		namespace := input.Namespace
 		if namespace == "" {

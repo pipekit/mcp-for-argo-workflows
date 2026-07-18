@@ -14,6 +14,8 @@ import (
 
 // DeleteWorkflowTemplateInput defines the input parameters for the delete_workflow_template tool.
 type DeleteWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -45,8 +47,13 @@ func DeleteWorkflowTemplateTool() *mcp.Tool {
 }
 
 // DeleteWorkflowTemplateHandler returns a handler function for the delete_workflow_template tool.
-func DeleteWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteWorkflowTemplateOutput, error) {
+func DeleteWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DeleteWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		name, err := ValidateName(input.Name)
 		if err != nil {

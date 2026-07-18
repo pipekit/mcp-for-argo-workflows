@@ -15,6 +15,8 @@ import (
 
 // GetWorkflowTemplateInput defines the input parameters for the get_workflow_template tool.
 type GetWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Name is the workflow template name (required).
 	Name string `json:"name" jsonschema:"Workflow template name,required"`
 
@@ -80,8 +82,13 @@ func GetWorkflowTemplateTool() *mcp.Tool {
 }
 
 // GetWorkflowTemplateHandler returns a handler function for the get_workflow_template tool.
-func GetWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetWorkflowTemplateInput) (*mcp.CallToolResult, *GetWorkflowTemplateOutput, error) {
+func GetWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetWorkflowTemplateInput) (*mcp.CallToolResult, *GetWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input GetWorkflowTemplateInput) (*mcp.CallToolResult, *GetWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate required input
 		if input.Name == "" {
 			return nil, nil, fmt.Errorf("name is required")

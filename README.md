@@ -164,6 +164,8 @@ Add to Cursor settings:
 | `ARGO_INSECURE_SKIP_VERIFY` | `--argo-insecure-skip-verify` | `false` | Skip TLS certificate verification |
 | `ARGO_HTTP1` | `--argo-http1` | `false` | Use HTTP/1.1 (REST) instead of gRPC for Argo Server. Required when the server is behind a reverse proxy (e.g. nginx ingress) that does not support gRPC |
 | `MCP_READ_ONLY` | `--read-only` | `false` | Disable mutating tools for monitoring/debugging-only access |
+| `MCP_MULTI_CONTEXT` | `--multi-context` | `true` | Allow tools to select a kubeconfig context per call. Only takes effect in direct K8s mode with stdio transport |
+| `MCP_ALLOWED_CONTEXTS` | `--allowed-contexts` | | Comma-separated kubeconfig context names permitted for per-call selection (empty = all). Must include the default context |
 
 **Precedence:** CLI flags > Environment variables > Default values
 
@@ -215,6 +217,40 @@ mcp-for-argo-workflows --read-only --namespace argo
 MCP_READ_ONLY=true mcp-for-argo-workflows --namespace argo
 ```
 
+#### Multi-Context (kubectx-style cluster selection)
+
+When running in direct Kubernetes mode over stdio, every cluster-facing tool
+accepts an optional `context` parameter selecting the kubeconfig context to run
+that call against — no stateful context switching required. The `list_contexts`
+tool lists the selectable context names and the default. This is on by default
+and disappears entirely (tool parameter, discovery tool) in Argo Server mode,
+with HTTP transport, or when disabled:
+
+```bash
+# Disable per-call context selection
+mcp-for-argo-workflows --multi-context=false --namespace argo
+
+# Restrict which contexts may be selected (must include the default context;
+# startup fails otherwise)
+mcp-for-argo-workflows --allowed-contexts staging,dev --context staging --namespace argo
+```
+
+Notes:
+
+- **Security**: multi-context grants the MCP client reach into *every* context
+  in your kubeconfig by default. Content the model processes (workflow logs,
+  manifests) is untrusted and could try to steer calls at other clusters. For
+  any sensitive setup, point `--kubeconfig` at a dedicated minimal file and/or
+  set `--allowed-contexts`. The reachable context set is logged at startup and
+  each cross-context call is logged.
+- Unknown and disallowed context names return the same "not available" error,
+  so the allowlist does not reveal hidden context names.
+- The set of contexts is read once at startup; kubeconfig edits require a
+  restart.
+- `--namespace` applies globally: the default namespace is the same for every
+  context, and each context's own kubeconfig namespace field is ignored.
+- Prompts and cluster resources always answer for the default context.
+- Per-context clients are created lazily on first use and cached.
 
 #### Port-forwarded Argo Server
 
@@ -316,6 +352,14 @@ mcp-for-argo-workflows \
 | Tool | Description |
 |------|-------------|
 | `get_workflow_node` | Get details of a specific node within a workflow |
+
+### Multi-Context (direct K8s mode with stdio transport only)
+
+| Tool | Description |
+|------|-------------|
+| `list_contexts` | List the kubeconfig context names selectable via the `context` parameter, and the default |
+
+> **Note:** When multi-context is available, every cluster-facing tool also accepts an optional `context` parameter selecting the kubeconfig context for that call. See [Multi-Context](#multi-context-kubectx-style-cluster-selection).
 
 ## Usage Examples
 

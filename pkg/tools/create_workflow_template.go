@@ -20,6 +20,8 @@ import (
 
 // CreateWorkflowTemplateInput defines the input parameters for the create_workflow_template tool.
 type CreateWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -47,8 +49,13 @@ func CreateWorkflowTemplateTool() *mcp.Tool {
 }
 
 // CreateWorkflowTemplateHandler returns a handler function for the create_workflow_template tool.
-func CreateWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateWorkflowTemplateInput) (*mcp.CallToolResult, *CreateWorkflowTemplateOutput, error) {
+func CreateWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateWorkflowTemplateInput) (*mcp.CallToolResult, *CreateWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CreateWorkflowTemplateInput) (*mcp.CallToolResult, *CreateWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

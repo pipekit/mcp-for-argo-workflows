@@ -16,6 +16,8 @@ import (
 
 // LintWorkflowInput defines the input parameters for the lint_workflow tool.
 type LintWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace for template resolution (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace for template resolution (uses default if not specified)"`
 
@@ -44,8 +46,13 @@ func LintWorkflowTool() *mcp.Tool {
 }
 
 // LintWorkflowHandler returns a handler function for the lint_workflow tool.
-func LintWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LintWorkflowInput) (*mcp.CallToolResult, *LintWorkflowOutput, error) {
+func LintWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LintWorkflowInput) (*mcp.CallToolResult, *LintWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input LintWorkflowInput) (*mcp.CallToolResult, *LintWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

@@ -15,6 +15,8 @@ import (
 
 // GetCronWorkflowInput defines the input parameters for the get_cron_workflow tool.
 type GetCronWorkflowInput struct {
+	KubeContextInput
+
 	// Name is the cron workflow name (required).
 	Name string `json:"name" jsonschema:"CronWorkflow name,required"`
 
@@ -67,8 +69,13 @@ func GetCronWorkflowTool() *mcp.Tool {
 }
 
 // GetCronWorkflowHandler returns a handler function for the get_cron_workflow tool.
-func GetCronWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetCronWorkflowInput) (*mcp.CallToolResult, *GetCronWorkflowOutput, error) {
+func GetCronWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, GetCronWorkflowInput) (*mcp.CallToolResult, *GetCronWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input GetCronWorkflowInput) (*mcp.CallToolResult, *GetCronWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate required input
 		if input.Name == "" {
 			return nil, nil, fmt.Errorf("name is required")

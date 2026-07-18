@@ -20,6 +20,8 @@ import (
 
 // CreateClusterWorkflowTemplateInput defines the input parameters for the create_cluster_workflow_template tool.
 type CreateClusterWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Manifest is the ClusterWorkflowTemplate YAML manifest.
 	Manifest string `json:"manifest" jsonschema:"ClusterWorkflowTemplate YAML manifest,required"`
 }
@@ -43,8 +45,13 @@ func CreateClusterWorkflowTemplateTool() *mcp.Tool {
 }
 
 // CreateClusterWorkflowTemplateHandler returns a handler function for the create_cluster_workflow_template tool.
-func CreateClusterWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateClusterWorkflowTemplateInput) (*mcp.CallToolResult, *CreateClusterWorkflowTemplateOutput, error) {
+func CreateClusterWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, CreateClusterWorkflowTemplateInput) (*mcp.CallToolResult, *CreateClusterWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CreateClusterWorkflowTemplateInput) (*mcp.CallToolResult, *CreateClusterWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

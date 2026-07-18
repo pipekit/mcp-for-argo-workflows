@@ -19,6 +19,8 @@ import (
 
 // DeleteArchivedWorkflowInput defines the input parameters for the delete_archived_workflow tool.
 type DeleteArchivedWorkflowInput struct {
+	KubeContextInput
+
 	// UID is the unique identifier of the archived workflow.
 	UID string `json:"uid" jsonschema:"Workflow UID,required"`
 }
@@ -44,8 +46,13 @@ func DeleteArchivedWorkflowTool() *mcp.Tool {
 }
 
 // DeleteArchivedWorkflowHandler returns a handler function for the delete_archived_workflow tool.
-func DeleteArchivedWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteArchivedWorkflowInput) (*mcp.CallToolResult, *DeleteArchivedWorkflowOutput, error) {
+func DeleteArchivedWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteArchivedWorkflowInput) (*mcp.CallToolResult, *DeleteArchivedWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DeleteArchivedWorkflowInput) (*mcp.CallToolResult, *DeleteArchivedWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate UID is provided
 		if strings.TrimSpace(input.UID) == "" {
 			return nil, nil, fmt.Errorf("workflow UID cannot be empty")
@@ -87,6 +94,8 @@ func DeleteArchivedWorkflowHandler(client argo.ClientInterface) func(context.Con
 
 // ResubmitArchivedWorkflowInput defines the input parameters for the resubmit_archived_workflow tool.
 type ResubmitArchivedWorkflowInput struct {
+	KubeContextInput
+
 	// UID is the unique identifier of the archived workflow.
 	UID string `json:"uid" jsonschema:"Workflow UID,required"`
 
@@ -124,8 +133,13 @@ func ResubmitArchivedWorkflowTool() *mcp.Tool {
 }
 
 // ResubmitArchivedWorkflowHandler returns a handler function for the resubmit_archived_workflow tool.
-func ResubmitArchivedWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResubmitArchivedWorkflowInput) (*mcp.CallToolResult, *ResubmitArchivedWorkflowOutput, error) {
+func ResubmitArchivedWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResubmitArchivedWorkflowInput) (*mcp.CallToolResult, *ResubmitArchivedWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ResubmitArchivedWorkflowInput) (*mcp.CallToolResult, *ResubmitArchivedWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate UID is provided
 		if strings.TrimSpace(input.UID) == "" {
 			return nil, nil, fmt.Errorf("workflow UID cannot be empty")
@@ -171,6 +185,8 @@ func ResubmitArchivedWorkflowHandler(client argo.ClientInterface) func(context.C
 
 // RetryArchivedWorkflowInput defines the input parameters for the retry_archived_workflow tool.
 type RetryArchivedWorkflowInput struct {
+	KubeContextInput
+
 	// UID is the unique identifier of the archived workflow.
 	UID string `json:"uid" jsonschema:"Workflow UID,required"`
 
@@ -211,8 +227,13 @@ func RetryArchivedWorkflowTool() *mcp.Tool {
 }
 
 // RetryArchivedWorkflowHandler returns a handler function for the retry_archived_workflow tool.
-func RetryArchivedWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RetryArchivedWorkflowInput) (*mcp.CallToolResult, *RetryArchivedWorkflowOutput, error) {
+func RetryArchivedWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, RetryArchivedWorkflowInput) (*mcp.CallToolResult, *RetryArchivedWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input RetryArchivedWorkflowInput) (*mcp.CallToolResult, *RetryArchivedWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate UID is provided
 		if strings.TrimSpace(input.UID) == "" {
 			return nil, nil, fmt.Errorf("workflow UID cannot be empty")

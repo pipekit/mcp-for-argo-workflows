@@ -31,6 +31,8 @@ const (
 
 // SubmitWorkflowInput defines the input parameters for the submit_workflow tool.
 type SubmitWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -77,8 +79,13 @@ func SubmitWorkflowTool() *mcp.Tool {
 }
 
 // SubmitWorkflowHandler returns a handler function for the submit_workflow tool.
-func SubmitWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, SubmitWorkflowInput) (*mcp.CallToolResult, *SubmitWorkflowOutput, error) {
+func SubmitWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, SubmitWorkflowInput) (*mcp.CallToolResult, *SubmitWorkflowOutput, error) {
 	return func(ctx context.Context, req *mcp.CallToolRequest, input SubmitWorkflowInput) (*mcp.CallToolResult, *SubmitWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate manifest is provided
 		if strings.TrimSpace(input.Manifest) == "" {
 			return nil, nil, fmt.Errorf("manifest cannot be empty")

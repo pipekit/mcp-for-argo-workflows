@@ -15,6 +15,8 @@ import (
 
 // ListClusterWorkflowTemplatesInput defines the input parameters for the list_cluster_workflow_templates tool.
 type ListClusterWorkflowTemplatesInput struct {
+	KubeContextInput
+
 	// Labels is an optional label selector to filter templates.
 	Labels string `json:"labels,omitempty" jsonschema:"Label selector to filter templates"`
 }
@@ -49,8 +51,13 @@ func ListClusterWorkflowTemplatesTool() *mcp.Tool {
 }
 
 // ListClusterWorkflowTemplatesHandler returns a handler function for the list_cluster_workflow_templates tool.
-func ListClusterWorkflowTemplatesHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListClusterWorkflowTemplatesInput) (*mcp.CallToolResult, *ListClusterWorkflowTemplatesOutput, error) {
+func ListClusterWorkflowTemplatesHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ListClusterWorkflowTemplatesInput) (*mcp.CallToolResult, *ListClusterWorkflowTemplatesOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ListClusterWorkflowTemplatesInput) (*mcp.CallToolResult, *ListClusterWorkflowTemplatesOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Build the list request
 		req := &clusterworkflowtemplate.ClusterWorkflowTemplateListRequest{}
 

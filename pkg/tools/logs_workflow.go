@@ -27,6 +27,8 @@ const (
 
 // LogsWorkflowInput defines the input parameters for the logs_workflow tool.
 type LogsWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -76,8 +78,13 @@ func LogsWorkflowTool() *mcp.Tool {
 }
 
 // LogsWorkflowHandler returns a handler function for the logs_workflow tool.
-func LogsWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LogsWorkflowInput) (*mcp.CallToolResult, *LogsWorkflowOutput, error) {
+func LogsWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, LogsWorkflowInput) (*mcp.CallToolResult, *LogsWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input LogsWorkflowInput) (*mcp.CallToolResult, *LogsWorkflowOutput, error) { //nolint:gocognit // Handler logic is sequential and readable
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName, err := ValidateName(input.Name)
 		if err != nil {

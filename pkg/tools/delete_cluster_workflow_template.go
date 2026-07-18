@@ -14,6 +14,8 @@ import (
 
 // DeleteClusterWorkflowTemplateInput defines the input parameters for the delete_cluster_workflow_template tool.
 type DeleteClusterWorkflowTemplateInput struct {
+	KubeContextInput
+
 	// Name is the ClusterWorkflowTemplate name.
 	Name string `json:"name" jsonschema:"ClusterWorkflowTemplate name,required"`
 }
@@ -39,8 +41,13 @@ func DeleteClusterWorkflowTemplateTool() *mcp.Tool {
 }
 
 // DeleteClusterWorkflowTemplateHandler returns a handler function for the delete_cluster_workflow_template tool.
-func DeleteClusterWorkflowTemplateHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteClusterWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteClusterWorkflowTemplateOutput, error) {
+func DeleteClusterWorkflowTemplateHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, DeleteClusterWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteClusterWorkflowTemplateOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DeleteClusterWorkflowTemplateInput) (*mcp.CallToolResult, *DeleteClusterWorkflowTemplateOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		name, err := ValidateName(input.Name)
 		if err != nil {

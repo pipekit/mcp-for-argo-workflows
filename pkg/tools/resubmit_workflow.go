@@ -15,6 +15,8 @@ import (
 
 // ResubmitWorkflowInput defines the input parameters for the resubmit_workflow tool.
 type ResubmitWorkflowInput struct {
+	KubeContextInput
+
 	// Namespace is the Kubernetes namespace (uses default if not specified).
 	Namespace string `json:"namespace,omitempty" jsonschema:"Kubernetes namespace (uses default if not specified)"`
 
@@ -61,8 +63,13 @@ func ResubmitWorkflowTool() *mcp.Tool {
 }
 
 // ResubmitWorkflowHandler returns a handler function for the resubmit_workflow tool.
-func ResubmitWorkflowHandler(client argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResubmitWorkflowInput) (*mcp.CallToolResult, *ResubmitWorkflowOutput, error) {
+func ResubmitWorkflowHandler(baseClient argo.ClientInterface) func(context.Context, *mcp.CallToolRequest, ResubmitWorkflowInput) (*mcp.CallToolResult, *ResubmitWorkflowOutput, error) {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ResubmitWorkflowInput) (*mcp.CallToolResult, *ResubmitWorkflowOutput, error) {
+		ctx, client, resolveErr := ResolveClient(ctx, baseClient, input.KubeContext)
+		if resolveErr != nil {
+			return nil, nil, resolveErr
+		}
+
 		// Validate and normalize name
 		workflowName := strings.TrimSpace(input.Name)
 		if workflowName == "" {
