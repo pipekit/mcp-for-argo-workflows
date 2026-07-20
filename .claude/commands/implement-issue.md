@@ -218,25 +218,23 @@ mcp__linear-server__create_comment(issueId: "<issue-id>", body: "PR created: <pr
 
 ## Step 9: Address Code Review Feedback
 
-CodeRabbit will automatically review the PR and may request changes. The PR requires approval before merging.
+CI must pass and any reviewer feedback must be addressed before merging.
 
 ### Review Process
 
-1. **Wait for CodeRabbit review** - It will post comments and potentially request changes
-2. **Address all feedback** - Fix issues raised by CodeRabbit
+1. **Wait for CI** - All checks must pass
+2. **Address all feedback** - Fix issues raised by reviewers
 3. **Commit and push fixes** - Push additional commits to the PR branch
-4. **CodeRabbit re-reviews** - It will review new commits automatically
-5. **Approval** - Once all comments are resolved, CodeRabbit will approve the PR
 
-### Addressing CodeRabbit Comments
+### Addressing Review Comments
 
-For each CodeRabbit comment:
+For each review comment:
 
 1. **Read the feedback carefully** - Understand what issue was identified
 2. **Make the fix** - Update the code to address the concern
 3. **Commit with context**:
    ```
-   Address CodeRabbit feedback: <brief description>
+   Address review feedback: <brief description>
 
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -244,27 +242,15 @@ For each CodeRabbit comment:
    ```
 4. **Push the fix**: `git push`
 
-### Common CodeRabbit Feedback Categories
-
-| Category | How to Address |
-|----------|----------------|
-| Error handling | Add proper error checks, don't ignore errors |
-| Missing tests | Add unit tests for new functionality |
-| Code style | Follow Go idioms, fix formatting |
-| Documentation | Add/improve comments, update README |
-| Security | Fix potential vulnerabilities (input validation, etc.) |
-| Performance | Optimize as suggested |
-
 ### If You Disagree with Feedback
 
-If CodeRabbit's suggestion isn't applicable:
+If a suggestion isn't applicable:
 1. Reply to the comment explaining why
-2. Use `@coderabbitai resolve` to mark it as addressed
-3. Document the reasoning in the code if needed
+2. Document the reasoning in the code if needed
 
 ## Step 10: Merge PR and Update Linear
 
-Once CodeRabbit approves the PR:
+Once CI is green and any review feedback is addressed:
 
 ### Merge the PR
 
