@@ -11,9 +11,9 @@ require (
 	github.com/stretchr/testify v1.12.0
 	github.com/testcontainers/testcontainers-go/modules/k3s v0.43.0
 	google.golang.org/grpc v1.83.1
-	k8s.io/api v0.34.3
-	k8s.io/apimachinery v0.34.3
-	k8s.io/client-go v0.34.3
+	k8s.io/api v0.36.3
+	k8s.io/apimachinery v0.36.3
+	k8s.io/client-go v0.36.3
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	sigs.k8s.io/yaml v1.6.0
 )
