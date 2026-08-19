@@ -13,6 +13,9 @@
     "before 9am every weekday"
   ],
   "timezone": "Europe/London",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "prConcurrentLimit": 20,
   "prHourlyLimit": 2,
   "packageRules": [
