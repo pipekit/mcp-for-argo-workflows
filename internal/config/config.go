@@ -16,15 +16,31 @@ import (
 // Valid transport modes.
 const (
 	TransportStdio = "stdio"
-	TransportHTTP  = "http"
+	// TransportHTTP is the HTTP+SSE transport, which streamable HTTP supersedes
+	// in the MCP specification. Kept for existing clients.
+	TransportHTTP = "http"
+	// TransportStreamableHTTP is the streamable HTTP transport. Prefer it for
+	// remote deployments: it needs no long-lived server-to-client channel, so a
+	// reverse proxy that closes idle streams cannot strand a session.
+	TransportStreamableHTTP = "streamable-http"
 )
+
+// isValidTransport reports whether name is a supported transport mode.
+func isValidTransport(name string) bool {
+	switch name {
+	case TransportStdio, TransportHTTP, TransportStreamableHTTP:
+		return true
+	default:
+		return false
+	}
+}
 
 // Config holds the combined configuration for the MCP server.
 // Fields are ordered for memory alignment rather than by topic.
 type Config struct {
 	// Context is the Kubernetes context to use (direct K8s mode only).
 	Context string
-	// Transport is the MCP transport mode: "stdio" or "http".
+	// Transport is the MCP transport mode: "stdio", "http" or "streamable-http".
 	Transport string
 	// ArgoServer is the Argo Server host:port (empty = direct K8s).
 	ArgoServer string
@@ -70,13 +86,14 @@ func DefaultConfig() *Config {
 
 // Validate returns an error if the configuration is invalid.
 func (c *Config) Validate() error {
-	if c.Transport != TransportStdio && c.Transport != TransportHTTP {
-		return fmt.Errorf("invalid transport %q, must be %q or %q", c.Transport, TransportStdio, TransportHTTP)
+	if !isValidTransport(c.Transport) {
+		return fmt.Errorf("invalid transport %q, must be %q, %q or %q",
+			c.Transport, TransportStdio, TransportHTTP, TransportStreamableHTTP)
 	}
 
-	// Validate HTTP address has a port when using HTTP transport
-	if c.Transport == TransportHTTP && c.HTTPAddr == "" {
-		return fmt.Errorf("http-addr is required when using HTTP transport")
+	// Validate HTTP address has a port when using an HTTP-based transport
+	if c.UsesHTTPListener() && c.HTTPAddr == "" {
+		return fmt.Errorf("http-addr is required when using the %q transport", c.Transport)
 	}
 
 	if err := c.validateMultiContext(); err != nil {
@@ -121,7 +138,7 @@ func NewFromFlags() (*Config, error) {
 	cfg := DefaultConfig()
 
 	// Define CLI flags
-	pflag.StringVar(&cfg.Transport, "transport", cfg.Transport, "MCP transport mode: stdio or http")
+	pflag.StringVar(&cfg.Transport, "transport", cfg.Transport, "MCP transport mode: stdio, http (SSE) or streamable-http")
 	pflag.StringVar(&cfg.HTTPAddr, "http-addr", cfg.HTTPAddr, "HTTP listen address")
 	pflag.StringVar(&cfg.ArgoServer, "argo-server", cfg.ArgoServer, "Argo Server host:port (empty = direct K8s)")
 	pflag.StringVar(&cfg.ArgoToken, "argo-token", cfg.ArgoToken, "Bearer token for Argo Server auth")
@@ -182,7 +199,7 @@ func applyEnvOverridesWithFlagSet(fs *pflag.FlagSet, cfg *Config) {
 	if !fs.Changed("transport") {
 		if v := os.Getenv("MCP_TRANSPORT"); v != "" {
 			v = strings.ToLower(strings.TrimSpace(v))
-			if v != TransportStdio && v != TransportHTTP {
+			if !isValidTransport(v) {
 				slog.Warn("invalid MCP_TRANSPORT value, using default",
 					"value", strconv.Quote(v), "default", cfg.Transport)
 			} else {
@@ -235,7 +252,19 @@ func (c *Config) ToArgoConfig() *argo.Config {
 	}
 }
 
-// IsHTTPTransport returns true if the HTTP transport mode is configured.
+// IsHTTPTransport returns true if the HTTP+SSE transport mode is configured.
 func (c *Config) IsHTTPTransport() bool {
 	return c.Transport == TransportHTTP
+}
+
+// IsStreamableHTTPTransport returns true if the streamable HTTP transport mode
+// is configured.
+func (c *Config) IsStreamableHTTPTransport() bool {
+	return c.Transport == TransportStreamableHTTP
+}
+
+// UsesHTTPListener returns true if the configured transport listens on a TCP
+// address rather than on stdio.
+func (c *Config) UsesHTTPListener() bool {
+	return c.IsHTTPTransport() || c.IsStreamableHTTPTransport()
 }
