@@ -40,7 +40,7 @@ spec:
               protocol: TCP
           env:
             - name: MCP_TRANSPORT
-              value: "http"
+              value: "streamable-http"
             - name: MCP_HTTP_ADDR
               value: ":8080"
             - name: ARGO_NAMESPACE
@@ -54,13 +54,13 @@ spec:
               cpu: "500m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10

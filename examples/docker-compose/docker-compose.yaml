@@ -22,7 +22,8 @@ services:
       - ./kubeconfig:/home/nonroot/.kube/config:ro
     restart: unless-stopped
     # Note: Healthcheck disabled because the distroless image does not include wget/curl.
-    # The application exposes /health endpoint for external health checks.
+    # The `streamable-http` transport serves /healthz for external health checks;
+    # the `http` (SSE) transport used here has no health endpoint.
 
   # Alternative: Connect to host network (for accessing localhost services)
   # This profile is intended for local development with port-forwarded Argo Server.
