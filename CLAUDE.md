@@ -11,7 +11,7 @@ MCP (Model Context Protocol) server for Argo Workflows, allowing AI assistants l
 ## Goals
 
 - Standalone Go binary using the official MCP Go SDK
-- Support both stdio and HTTP/SSE transports
+- Support stdio, streamable HTTP and HTTP/SSE transports
 - Support both direct Kubernetes API access and Argo Server connections
 - Cover all major CLI operations as MCP tools
 
@@ -60,7 +60,8 @@ internal/                      # Binary-specific glue (not importable externally
 ### Transport Modes
 
 - **stdio** (default) — For local clients like Claude Desktop, Cursor
-- **HTTP/SSE** — For remote client connections
+- **streamable-http** — For remote client connections. Serves MCP on `/mcp` and a liveness endpoint on `/healthz`; every other path is 404
+- **HTTP/SSE** (`http`) — The earlier remote transport, superseded by streamable HTTP in the MCP spec. Kept for clients that only speak SSE
 
 ### Configuration
 
@@ -68,7 +69,7 @@ Environment variables / CLI flags:
 - `ARGO_SERVER` / `--argo-server` — Argo Server host:port
 - `ARGO_TOKEN` / `--argo-token` — Bearer token for auth
 - `ARGO_NAMESPACE` / `--namespace` — Default namespace
-- `MCP_TRANSPORT` / `--transport` — `stdio` (default) or `http`
+- `MCP_TRANSPORT` / `--transport` — `stdio` (default), `streamable-http`, or `http` (HTTP+SSE)
 - `MCP_HTTP_ADDR` / `--http-addr` — HTTP listen address (default `:8080`)
 - `KUBECONFIG` / `--kubeconfig` — Path to kubeconfig (when not using Argo Server)
 - `MCP_MULTI_CONTEXT` / `--multi-context` — Per-call kubeconfig context selection (default `true`; direct K8s + stdio only)

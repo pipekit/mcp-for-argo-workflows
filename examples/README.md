@@ -22,7 +22,7 @@ Configuration examples for [Cursor](https://cursor.sh/), the AI-powered code edi
 
 ### [Kubernetes](./kubernetes/)
 
-Deploy MCP for Argo Workflows as an HTTP/SSE server in Kubernetes.
+Deploy MCP for Argo Workflows as a remote HTTP server in Kubernetes.
 
 - Deployment and Service manifests
 - RBAC configuration
@@ -41,8 +41,8 @@ Run MCP for Argo Workflows locally using Docker Compose.
 |---------------|-----------|----------|
 | Claude Desktop | stdio | Local development with Claude Desktop |
 | Cursor | stdio | Local development with Cursor IDE |
-| Kubernetes | HTTP/SSE | Production deployments, remote access |
-| Docker Compose | HTTP/SSE | Local testing, development |
+| Kubernetes | streamable-http | Production deployments, remote access |
+| Docker Compose | streamable-http | Local testing, development |
 
 ## Getting Started
 
@@ -59,7 +59,7 @@ All examples support these configuration options:
 | Namespace | `--namespace` | `ARGO_NAMESPACE` | Default Kubernetes namespace |
 | Argo Server | `--argo-server` | `ARGO_SERVER` | Argo Server host:port |
 | Token | `--argo-token` | `ARGO_TOKEN` | Bearer token for auth |
-| Transport | `--transport` | `MCP_TRANSPORT` | `stdio` or `http` |
+| Transport | `--transport` | `MCP_TRANSPORT` | `stdio`, `streamable-http`, or `http` (HTTP+SSE) |
 | HTTP Address | `--http-addr` | `MCP_HTTP_ADDR` | HTTP listen address |
 | TLS | `--argo-secure` | `ARGO_SECURE` | Use TLS (default: true) |
 | Skip TLS Verify | `--argo-insecure-skip-verify` | `ARGO_INSECURE_SKIP_VERIFY` | Skip cert verification |

@@ -57,11 +57,16 @@ func TestRunStreamableHTTP_Health(t *testing.T) {
 
 // TestRunStreamableHTTP_UnknownPath tests that only the MCP and health
 // endpoints are served, so a proxy publishing one path publishes nothing else.
+//
+// "/mcp/" is in the list deliberately: MCPPath is registered as an exact
+// pattern, and ServeMux only ever redirects towards a registered subtree, never
+// away from one. A client or proxy that appends a trailing slash gets a 404, so
+// clients must be configured with the exact path.
 func TestRunStreamableHTTP_UnknownPath(t *testing.T) {
 	addr := startStreamableHTTP(t)
 
 	client := &http.Client{Timeout: time.Second}
-	for _, path := range []string{"/", "/sse", "/metrics"} {
+	for _, path := range []string{"/", "/sse", "/metrics", MCPPath + "/"} {
 		t.Run(path, func(t *testing.T) {
 			resp, err := client.Get(fmt.Sprintf("http://%s%s", addr, path))
 			require.NoError(t, err)
@@ -127,12 +132,18 @@ func TestRunStreamableHTTP_GracefulShutdown(t *testing.T) {
 
 // TestRunStreamableHTTP_InvalidAddress tests that a bad listen address is
 // reported rather than silently ignored.
+//
+// The port is what makes this address invalid, so the failure comes out of
+// parsing and never reaches a resolver: an unparseable host would send
+// net.Listen to DNS, and a slow lookup would outlive the context, leaving the
+// server to shut down cleanly and return nil.
 func TestRunStreamableHTTP_InvalidAddress(t *testing.T) {
 	srv := NewServer("test-server", "1.0.0")
 
 	ctx, cancel := context.WithTimeout(t.Context(), 500*time.Millisecond)
 	defer cancel()
 
-	err := srv.RunStreamableHTTP(ctx, "999.999.999.999:8080")
-	assert.Error(t, err)
+	err := srv.RunStreamableHTTP(ctx, "127.0.0.1:99999")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid port")
 }

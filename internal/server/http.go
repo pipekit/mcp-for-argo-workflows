@@ -25,6 +25,20 @@ const (
 	HealthPath = "/healthz"
 )
 
+// streamableSessionTimeout is how long a streamable HTTP session may sit idle
+// before the server closes it.
+//
+// The SDK never expires sessions by default, and a streamable session outlives
+// the request that created it: it ends on an explicit DELETE or on this timer,
+// nothing else. A client that crashes, sleeps or loses its connection therefore
+// leaks a session, its JSON-RPC connection and a goroutine for the lifetime of
+// the process. HTTP+SSE has no such problem, because there the session ends
+// with the GET that opened it.
+//
+// Half an hour is well past any gap between calls in an interactive session,
+// while still bounding what an abandoned client costs.
+const streamableSessionTimeout = 30 * time.Minute
+
 // newHTTPServer returns the HTTP server an MCP transport listens with.
 //
 // Tool calls run on a context derived from the incoming HTTP request, whereas
@@ -73,7 +87,7 @@ func (s *Server) RunHTTP(ctx context.Context, addr string) error {
 func (s *Server) RunStreamableHTTP(ctx context.Context, addr string) error {
 	handler := mcp.NewStreamableHTTPHandler(func(_ *http.Request) *mcp.Server {
 		return s.mcp
-	}, nil)
+	}, &mcp.StreamableHTTPOptions{SessionTimeout: streamableSessionTimeout})
 
 	mux := http.NewServeMux()
 	mux.Handle(MCPPath, handler)
