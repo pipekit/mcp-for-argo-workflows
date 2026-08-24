@@ -109,11 +109,15 @@ func run(ctx context.Context) error {
 
 	// Start the server with the configured transport.
 	// The ctx here is the Argo SDK context (see nolint:contextcheck above).
-	if cfg.IsHTTPTransport() {
+	switch {
+	case cfg.IsStreamableHTTPTransport():
+		slog.Info("starting streamable HTTP transport", "addr", cfg.HTTPAddr, "path", server.MCPPath)
+		return srv.RunStreamableHTTP(ctx, cfg.HTTPAddr) //nolint:contextcheck // ctx is Argo SDK context with K8s client
+	case cfg.IsHTTPTransport():
 		slog.Info("starting HTTP transport", "addr", cfg.HTTPAddr)
 		return srv.RunHTTP(ctx, cfg.HTTPAddr) //nolint:contextcheck // ctx is Argo SDK context with K8s client
+	default:
+		// Default to stdio transport
+		return srv.RunStdio(ctx) //nolint:contextcheck // ctx is Argo SDK context with K8s client
 	}
-
-	// Default to stdio transport
-	return srv.RunStdio(ctx) //nolint:contextcheck // ctx is Argo SDK context with K8s client
 }

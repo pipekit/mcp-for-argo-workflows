@@ -25,7 +25,8 @@ The [Model Context Protocol](https://modelcontextprotocol.io/) is an open standa
 ### Transport Modes
 
 - **stdio** (default) — For local clients like Claude Desktop and Cursor
-- **HTTP/SSE** — For remote client connections
+- **streamable-http** — For remote client connections. Serves MCP on `/mcp` and a liveness endpoint on `/healthz`
+- **HTTP/SSE** (`http`) — The earlier remote transport, superseded by streamable HTTP. Kept for clients that only speak SSE
 
 ### Supported MCP Clients
 
@@ -153,7 +154,7 @@ Add to Cursor settings:
 
 | Environment Variable | CLI Flag | Default | Description |
 |---------------------|----------|---------|-------------|
-| `MCP_TRANSPORT` | `--transport` | `stdio` | MCP transport mode: `stdio` or `http` |
+| `MCP_TRANSPORT` | `--transport` | `stdio` | MCP transport mode: `stdio`, `streamable-http`, or `http` (HTTP+SSE) |
 | `MCP_HTTP_ADDR` | `--http-addr` | `:8080` | HTTP listen address (when using HTTP transport) |
 | `ARGO_SERVER` | `--argo-server` | | Argo Server host:port (omit for direct K8s API) |
 | `ARGO_TOKEN` | `--argo-token` | | Bearer token for Argo Server authentication |
@@ -197,7 +198,35 @@ mcp-for-argo-workflows \
   --namespace argo
 ```
 
-#### HTTP Transport for Remote Access
+#### Streamable HTTP for Remote Access
+
+```bash
+mcp-for-argo-workflows \
+  --transport streamable-http \
+  --http-addr 0.0.0.0:8080 \
+  --namespace argo
+```
+
+The server then answers MCP on `http://<host>:8080/mcp` and liveness on
+`/healthz`; every other path is 404, so a reverse proxy can publish the MCP
+endpoint alone. Configure clients with the full `/mcp` URL:
+
+```json
+{
+  "mcpServers": {
+    "argo-workflows": {
+      "type": "http",
+      "url": "https://argo-mcp.example.com/mcp"
+    }
+  }
+}
+```
+
+State the bind address explicitly when running in a container: a server bound
+only to loopback is unreachable from off-pod, and the health probe failure that
+follows looks nothing like a bind problem.
+
+#### HTTP+SSE Transport (superseded)
 
 ```bash
 mcp-for-argo-workflows \
@@ -205,6 +234,12 @@ mcp-for-argo-workflows \
   --http-addr :8080 \
   --namespace argo
 ```
+
+Prefer `streamable-http` for new deployments. HTTP+SSE routes every
+server-to-client message through one long-lived `GET` stream, so a proxy that
+closes idle streams (Envoy's `stream_idle_timeout` defaults to 300s) strands the
+session. Under streamable HTTP each POST carries its own response stream, so the
+same cut costs nothing.
 
 #### Read-Only Mode
 

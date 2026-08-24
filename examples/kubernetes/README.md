@@ -1,10 +1,10 @@
 # Kubernetes Deployment
 
-This directory contains example Kubernetes manifests for deploying MCP for Argo Workflows as a remote HTTP/SSE server.
+This directory contains example Kubernetes manifests for deploying MCP for Argo Workflows as a remote HTTP server.
 
 ## Overview
 
-When deployed as a Kubernetes service, the MCP server runs in HTTP/SSE transport mode, allowing remote MCP clients to connect over the network.
+When deployed as a Kubernetes service, the MCP server runs in a remote HTTP transport mode, allowing remote MCP clients to connect over the network. Prefer `streamable-http`: it serves MCP on `/mcp` and a liveness endpoint on `/healthz`, and needs no long-lived server-to-client stream, so a proxy that closes idle streams cannot strand a session.
 
 ## Files
 
@@ -53,7 +53,7 @@ kubectl logs -n mcp-argo -l app=mcp-for-argo-workflows
 kubectl port-forward -n mcp-argo svc/mcp-for-argo-workflows 8080:8080
 ```
 
-Then connect your MCP client to `http://localhost:8080`.
+Then connect your MCP client to `http://localhost:8080` — with `streamable-http`, to `http://localhost:8080/mcp`. That path is registered exactly, so a trailing slash is a 404.
 
 **Ingress (for production)**:
 
@@ -88,7 +88,7 @@ The deployment can be configured via environment variables in `deployment.yaml`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MCP_TRANSPORT` | Transport mode | `http` |
+| `MCP_TRANSPORT` | Transport mode | `http` (set to `streamable-http` for the current transport) |
 | `MCP_HTTP_ADDR` | HTTP listen address | `:8080` |
 | `ARGO_NAMESPACE` | Default namespace | `argo` |
 | `ARGO_SERVER` | Argo Server address (optional) | - |

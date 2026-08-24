@@ -19,6 +19,7 @@ func TestMultiContextEnabled(t *testing.T) {
 		{name: "stdio direct k8s enabled", transport: TransportStdio, multiContext: true, want: true},
 		{name: "stdio direct k8s disabled", transport: TransportStdio, multiContext: false, want: false},
 		{name: "http transport", transport: TransportHTTP, multiContext: true, want: false},
+		{name: "streamable http transport", transport: TransportStreamableHTTP, multiContext: true, want: false},
 		{name: "argo server mode", transport: TransportStdio, argoServer: "localhost:2746", multiContext: true, want: false},
 		{name: "argo server and http", transport: TransportHTTP, argoServer: "localhost:2746", multiContext: true, want: false},
 	}
@@ -30,6 +31,69 @@ func TestMultiContextEnabled(t *testing.T) {
 			cfg.ArgoServer = tt.argoServer
 			cfg.MultiContext = tt.multiContext
 			assert.Equal(t, tt.want, cfg.MultiContextEnabled())
+		})
+	}
+}
+
+// testHTTPAddr is an arbitrary listen address for transport validation tests;
+// nothing binds it.
+const testHTTPAddr = ":8080"
+
+func TestValidate_Transport(t *testing.T) {
+	tests := []struct {
+		name      string
+		transport string
+		httpAddr  string
+		wantErr   string
+	}{
+		{name: "stdio", transport: TransportStdio},
+		{name: "http", transport: TransportHTTP, httpAddr: testHTTPAddr},
+		{name: "streamable http", transport: TransportStreamableHTTP, httpAddr: testHTTPAddr},
+		{name: "unknown transport", transport: "websocket", wantErr: `invalid transport "websocket"`},
+		{
+			name:      "streamable http without address",
+			transport: TransportStreamableHTTP,
+			wantErr:   "http-addr is required",
+		},
+		{
+			name:      "http without address",
+			transport: TransportHTTP,
+			wantErr:   "http-addr is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := DefaultConfig()
+			cfg.Transport = tt.transport
+			cfg.HTTPAddr = tt.httpAddr
+
+			err := cfg.Validate()
+			if tt.wantErr == "" {
+				require.NoError(t, err)
+				return
+			}
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErr)
+		})
+	}
+}
+
+func TestUsesHTTPListener(t *testing.T) {
+	tests := []struct {
+		transport string
+		want      bool
+	}{
+		{transport: TransportStdio, want: false},
+		{transport: TransportHTTP, want: true},
+		{transport: TransportStreamableHTTP, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.transport, func(t *testing.T) {
+			cfg := DefaultConfig()
+			cfg.Transport = tt.transport
+			assert.Equal(t, tt.want, cfg.UsesHTTPListener())
 		})
 	}
 }
@@ -139,6 +203,33 @@ func TestValidate_NormalizesAllowedContexts(t *testing.T) {
 	cfg.AllowedContexts = []string{" alpha ", "", "beta", "  "}
 	require.NoError(t, cfg.Validate())
 	assert.Equal(t, []string{"alpha", "beta"}, cfg.AllowedContexts)
+}
+
+func TestApplyEnvOverrides_Transport(t *testing.T) {
+	t.Run("MCP_TRANSPORT selects streamable http", func(t *testing.T) {
+		t.Setenv("MCP_TRANSPORT", "streamable-http")
+		cfg := DefaultConfig()
+		fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		applyEnvOverridesWithFlagSet(fs, cfg)
+		assert.Equal(t, TransportStreamableHTTP, cfg.Transport)
+		assert.True(t, cfg.IsStreamableHTTPTransport())
+	})
+
+	t.Run("MCP_TRANSPORT is normalized", func(t *testing.T) {
+		t.Setenv("MCP_TRANSPORT", "  Streamable-HTTP ")
+		cfg := DefaultConfig()
+		fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		applyEnvOverridesWithFlagSet(fs, cfg)
+		assert.Equal(t, TransportStreamableHTTP, cfg.Transport)
+	})
+
+	t.Run("invalid MCP_TRANSPORT keeps the default", func(t *testing.T) {
+		t.Setenv("MCP_TRANSPORT", "websocket")
+		cfg := DefaultConfig()
+		fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		applyEnvOverridesWithFlagSet(fs, cfg)
+		assert.Equal(t, TransportStdio, cfg.Transport)
+	})
 }
 
 func TestApplyEnvOverrides_MultiContext(t *testing.T) {
