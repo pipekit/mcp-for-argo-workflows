@@ -6,7 +6,7 @@ require (
 	github.com/argoproj/argo-workflows/v4 v4.1.2
 	github.com/goccy/go-graphviz v0.2.10
 	github.com/google/jsonschema-go v0.4.3
-	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go/modules/k3s v0.44.0
